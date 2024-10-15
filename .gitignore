@@ -162,6 +162,6 @@ cython_debug/
 #.idea/
 
 
-/experiment/scrapped/
-/experiment/training_result/
+/experiment/train/scrapped/
 /dataset/
+/experiment/train/training_result
