@@ -1,5 +1,10 @@
 import sys
 import os
+from absl import logging
+
+#Disable logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+logging.getLogger('absl').setLevel(logging.ERROR)
 
 # Menambahkan path src ke Python path agar modul-modul dalam source code dapat dipanggil
 working_dir = os.path.abspath(os.path.dirname(__file__))
@@ -13,10 +18,9 @@ from configs import data_location as dataloc
 # Set seed untuk beberapa library python agar hasil deterministik
 from utils import general_utils as gutils
 from utils import training_utils as tutils
-# gutils.use_gpu(config.USE_GPU)
+gutils.use_gpu(config.USE_GPU)
 # gutils.use_mixed_precision()
 # gutils.set_determinism(config.SEED)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Import packages lainnya yang diperlukan
 import signal
@@ -32,9 +36,9 @@ from tensorflow.keras import callbacks
 
 def load_data(augment=False):
     train_data_dir = os.path.join(config.DATA_PATH, 'train')
-    train_data_dir = dataloc.ADDITIONAL_DATA_PATH
+    # train_data_dir = dataloc.ADDITIONAL_DATA_PATH
     val_data_dir = os.path.join(config.DATA_PATH, 'validation')
-    val_data_dir=dataloc.ADDITIONAL_DATA_PATH
+    # val_data_dir=dataloc.ADDITIONAL_DATA_PATH
     train_datagen = gutils.make_datagen(train_data_dir, config.IMAGE_SIZE, config.BATCH_SIZE,
                                         augment=augment)
     val_datagen = gutils.make_datagen(val_data_dir, config.IMAGE_SIZE, config.BATCH_SIZE)
@@ -48,8 +52,8 @@ model_checkpoint = callbacks.ModelCheckpoint(
     os.path.join(config.RESULT_PATH, config.MODEL_FILENAME),
     verbose=0
     )
-# model_callbacks.append(tensorboard_callback)
-# model_callbacks.append(model_checkpoint)
+model_callbacks.append(tensorboard_callback)
+model_callbacks.append(model_checkpoint)
 
 # Muat data
 train_datagen, val_datagen = load_data(config.AUGMENT)
