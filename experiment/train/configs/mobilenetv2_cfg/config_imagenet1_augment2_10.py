@@ -21,7 +21,7 @@ from tensorflow.keras import optimizers
 from datetime import datetime
 
 # SEED = 42
-CFG_NUM = 'imagenet1_augment2.10'
+CFG_NUM = 'imagenet1_augment2.10_attempt2'
 USE_GPU= True
 DATA_PATH = "../../dataset/split_prepped_data - Copy"
 
@@ -30,8 +30,8 @@ IMAGE_SIZE      = (224, 224)
 INPUT_SHAPE     = tuple(list(IMAGE_SIZE) + [3])
 NUM_CLASSES     = 8
 BATCH_SIZE      = 12
-N_GRADIENTS     = 0
-EPOCHS          = 200
+N_GRADIENTS     = 8
+EPOCHS          = 250
 LEARNING_RATE   = 0.045/8
 DECAY_STEPS     = EPOCHS
 AUGMENT         = True

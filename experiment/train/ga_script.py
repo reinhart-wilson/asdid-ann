@@ -1,6 +1,6 @@
 import sys
 import os
-from absl import logging
+import logging
 
 #Disable logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -65,8 +65,11 @@ class_weights = tutils.compute_class_weight(train_datagen)
 LR_SCHEDULE = optimizers.schedules.CosineDecay(
     initial_learning_rate=config.LEARNING_RATE,
     alpha = config.LR_ALPHA,
-    decay_steps=tutils.compute_decay_steps(train_datagen.samples, config.BATCH_SIZE, 
-                                    config.EPOCHS)
+    decay_steps=tutils.compute_decay_steps_ga(
+        train_datagen.samples, 
+        config.BATCH_SIZE, 
+        config.N_GRADIENTS,                                    
+        config.EPOCHS)
 )
 OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
 # OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
@@ -77,7 +80,7 @@ model.build_model()
 model.compile_model(optimizer=OPTIMIZER)
 history = model.train(train_datagen, val_datagen, epochs = config.EPOCHS, 
             batch_size=config.BATCH_SIZE,callbacks=model_callbacks, 
-            class_weights=class_weights)
+            class_weights=None ) #class_weights)
 model_path= os.path.join(config.RESULT_PATH, 'model.tf')
 model.save_model(model_path)
 

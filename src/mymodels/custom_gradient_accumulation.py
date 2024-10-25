@@ -30,7 +30,7 @@ class CustomGradientAccumulation(tf.keras.Model):
         self.n_acum_step.assign_add(1)
 
         # Memisahkan data input menjadi x (fitur) dan y (label).
-        x, y, sample_weight = data
+        x, y = data
         
         # Menggunakan GradientTape untuk merekam operasi yang dilakukan selama perhitungan forward pass.
         with tf.GradientTape() as tape:

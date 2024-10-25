@@ -16,15 +16,15 @@ def compute_decay_steps(num_samples, batch_size, epochs):
     decay_steps = steps_per_epoch * epochs # Total number of steps (across all epochs)
     return decay_steps 
 
-# def compute_decay_steps_ga(num_samples, batch_size, n_gradients, epochs):
-#     total_batch = num_samples/batch_size
+def compute_decay_steps_ga(num_samples, batch_size, n_gradients, epochs):
+    total_batch = num_samples/batch_size
     
-#     effective_update_steps = total_batch / n_gradients
+    effective_update_steps = total_batch / n_gradients
     
-#     # Total number of steps (across all epochs)
-#     decay_steps = effective_update_steps * epochs
+    # Total number of steps (across all epochs)
+    decay_steps = effective_update_steps * epochs
     
-#     return decay_steps 
+    return decay_steps 
 
 def generate_callbacks(callback_configs):
     callbacks = []
