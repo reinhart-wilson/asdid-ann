@@ -7,7 +7,7 @@ src_dir = os.path.join(working_dir, '..', '..', 'src')
 sys.path.append(src_dir)
 
 # Import file konfigurasi
-from configs.exp1 import mobilenetv2_cfg as config
+from configs.exp1 import efficientnetv2_cfg as config
 from configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
@@ -63,8 +63,9 @@ def train():
     model.build_model()
     model.compile_model(optimizer=OPTIMIZER)
     model.train(train_datagen, val_datagen, epochs = config.EPOCHS, 
-                batch_size=config.BATCH_SIZE,callbacks=callbacks, 
-                class_weights=class_weights)
+                batch_size=config.BATCH_SIZE,callbacks=callbacks
+                # class_weights=class_weights
+                )
     
     # Release memory
     signal.signal(signal.SIGINT, gutils.clean_memory)
@@ -92,5 +93,5 @@ def resume_train(at_epoch):
 
     
 if __name__ == "__main__":
-    train()  
-    # resume_train(30)
+    # train()  
+    resume_train(30)
