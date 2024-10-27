@@ -12,13 +12,13 @@ src_dir = os.path.join(working_dir, '..', '..', 'src')
 sys.path.append(src_dir)
 
 # Import file konfigurasi
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_10 as config
+from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_2 as config
 from configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
 from utils import general_utils as gutils
 from utils import training_utils as tutils
-gutils.use_gpu(config.USE_GPU)
+# gutils.use_gpu(config.USE_GPU)
 # gutils.use_mixed_precision()
 # gutils.set_determinism(config.SEED)
 
@@ -61,15 +61,26 @@ train_datagen, val_datagen = load_data(config.AUGMENT)
 # Gunakan class weights
 class_weights = tutils.compute_class_weight(train_datagen)
 
-# temp
-LR_SCHEDULE = optimizers.schedules.CosineDecay(
-    initial_learning_rate=config.LEARNING_RATE,
-    alpha = config.LR_ALPHA,
-    decay_steps=tutils.compute_decay_steps_ga(
+# Hitung decay steps
+if config.N_GRADIENTS>0:
+    decay_steps = tutils.compute_decay_steps_ga(
         train_datagen.samples, 
         config.BATCH_SIZE, 
         config.N_GRADIENTS,                                    
-        config.EPOCHS)
+        config.EPOCHS
+        )
+else:
+    decay_steps = tutils.compute_decay_steps(
+        train_datagen.samples,                                              
+        config.BATCH_SIZE,                                              
+        config.EPOCHS
+        )    
+
+
+LR_SCHEDULE = optimizers.schedules.CosineDecay(
+    initial_learning_rate=config.LEARNING_RATE,
+    alpha = config.LR_ALPHA,
+    decay_steps=decay_steps
 )
 OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
 # OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
