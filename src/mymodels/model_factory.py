@@ -63,10 +63,11 @@ def create_model(input_shape, num_classes, model_config_dict):
     elif model_name == 'efficientnet':
         return EfficientNet(input_shape, num_classes)
     
-    elif model_name == 'efficientnetv2':
+    elif model_name == 'efficientnetv2b0':
         return EfficientNetV2(input_shape, 
-                           num_classes, 
-                           dense_neuron_num= model_config_dict['dense'])
+                           num_classes
+                           # dense_neuron_num= model_config_dict['dense']
+                           )
     elif model_name == 'vgg16':
         return VGG16(input_shape, num_classes)
     else:
