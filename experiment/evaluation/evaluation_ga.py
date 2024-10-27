@@ -18,7 +18,7 @@ sys.path.append(train_dir)
 
 
 from configs import data_location as dataloc
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_10 as config
+from configs.mobilenetv2_cfg import config_imagenet1_augment2_7 as config
 
 from utils import general_utils as gutils
 # gutils.use_gpu(False)
@@ -30,7 +30,7 @@ from sklearn.metrics import classification_report
 
 
 def main():  
-    at_epoch = 190
+    at_epoch = 200
     config_num = config.CFG_NUM
     result_folder = f'config{config_num}'
     result_path = os.path.join(train_dir, 'training_result', 

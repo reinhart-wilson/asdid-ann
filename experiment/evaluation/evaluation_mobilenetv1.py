@@ -40,7 +40,7 @@ def main():
     # 
     test_data_dir = os.path.join(dataloc.DATA_PATH, 'test')
     test_data_dir = os.path.join(dataloc.DATA_PATH, 'validation')
-    # test_data_dir = dataloc.ADDITIONAL_DATA_PATH
+    test_data_dir = dataloc.ADDITIONAL_DATA_PATH
     test_generator = gutils.make_datagen(test_data_dir, config.IMAGE_SIZE, 
                                         config.BATCH_SIZE, shuffle=False)
     
