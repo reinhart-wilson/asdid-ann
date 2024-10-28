@@ -104,11 +104,10 @@ b.Finish(
     _metadata.MetadataPopulator.METADATA_FILE_IDENTIFIER)
 metadata_buf = b.Output()
 
+# Menambahkan metadata ke model tflite
 model_file = ("C:/Users/reinh/Documents/GitHub/asdid-ann/tflite models/v1/"
               "model_at_epoch_150.tflite")
 populator = _metadata.MetadataPopulator.with_model_file(model_file)
 populator.load_metadata_buffer(metadata_buf)
 populator.load_associated_files(["label.txt"])
 populator.populate()
-
-
