@@ -23,7 +23,7 @@ from keras.models import load_model
 from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_2 as config
 
 # Memuat model yang sudah dilatih
-at_epoch = 1
+at_epoch = 150
 # model_filename = config.MODEL_FILENAME.format(epoch=at_epoch)
 # model_path = os.path.join(config.RESULT_PATH, model_filename)
 # model = load_model(model_path)

@@ -15,7 +15,7 @@ sys.path.append(src_dir)
 
 
 import logging
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_10 as config
+from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_2 as config
 from tensorflow.keras.models import load_model
 from tensorflow.keras import callbacks
 from utils import general_utils as gutils
@@ -42,7 +42,7 @@ val_datagen = gutils.make_datagen(val_data_dir, config.IMAGE_SIZE, config.BATCH_
 
 
 #Continue training
-at_epoch=31
+at_epoch=56
 model_path = os.path.join(
     config.RESULT_PATH, 
     config.MODEL_FILENAME.format(epoch=at_epoch)
@@ -57,4 +57,4 @@ model_checkpoint = callbacks.ModelCheckpoint(
 model_callbacks.append(tensorboard_callback)
 model_callbacks.append(model_checkpoint)
 tutils.train_model(model, train_datagen, val_datagen, config.EPOCHS, 
-                   config.RESULT_PATH, last_epoch=at_epoch)
+                   config.RESULT_PATH, last_epoch=at_epoch, callbacks=model_callbacks)

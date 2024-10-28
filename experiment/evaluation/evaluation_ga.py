@@ -18,7 +18,7 @@ sys.path.append(train_dir)
 
 
 from configs import data_location as dataloc
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_7 as config
+from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_2 as config
 
 from utils import general_utils as gutils
 # gutils.use_gpu(False)
@@ -30,13 +30,13 @@ from sklearn.metrics import classification_report
 
 
 def main():  
-    at_epoch = 200
+    at_epoch = 150
     config_num = config.CFG_NUM
     result_folder = f'config{config_num}'
     result_path = os.path.join(train_dir, 'training_result', 
                                 config.MODEL_CONFIG['model_name'])
     result_path = os.path.join(result_path, result_folder)
-    model_path = os.path.join(result_path, f"model_at_epoch{at_epoch}.tf")
+    model_path = os.path.join(result_path, f"model_at_epoch{at_epoch}")
     history_path = os.path.join(result_path, f"history_at_epoch{at_epoch}.pkl")
     
     #
@@ -59,6 +59,7 @@ def main():
     
     # 
     class_labels = list(test_generator.class_indices.keys())
+    print(class_labels)
     predictions = model.predict(test_generator)
     true_classes = test_generator.classes
     
