@@ -73,12 +73,9 @@ class DataPrep:
                     
     def resize_image(self, input_path, output_path, size):
         """
-        Mengubah satu gambar dengan mempertahankan aspek rasio. Pengguna hanya
-        bisa memilih salah satu ukuran yang akan menjadi patokan: lebar atau
-        tinggi. Secara default, width akan menjadi patokan sehingga tinggi baru 
-        gambar akan secara otomatis disesuaikan dengan memperhitungkan aspek 
-        rasio. Jika pengguna ingin mengatur tinggi, maka argumen opsional 
-        height harus diisi.
+        Mengubah satu gambar dengan mempertahankan aspek rasio. Ukuran tinggi
+        atau lebar (akan diambil mana yang lebih besar) akan diambil menjadi 
+        patokan mengukur besaran yang lain agar aspek rasio dipertahankan
     
         Args
         ----------
