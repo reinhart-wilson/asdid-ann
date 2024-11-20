@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 import pickle
+import tensorflow as tf
 from sklearn.metrics import  ConfusionMatrixDisplay, confusion_matrix
 
 def load_history(file_path):
@@ -11,6 +11,75 @@ def load_history(file_path):
 
 def predict():
     pass
+
+def get_flops(model, model_inputs) -> float:
+    """
+    Menghitung jumlah FLOPs (Floating Point Operations) dari model TensorFlow
+    atau Keras untuk inferensi pada satu sample input.
+
+    Parameters
+    ----------
+    model : tf.keras.Model atau tf.keras.Sequential
+        Model Keras atau TensorFlow yang ingin dihitung FLOPs-nya. Model harus 
+        berupa instance dari `tf.keras.Model` atau `tf.keras.Sequential`.
+    model_inputs : list of tf.Tensor
+        Contoh input model dalam bentuk tensor TensorFlow. Tensor ini digunakan 
+        untuk menentukan spesifikasi input saat membekukan grafik model.
+
+    Raises
+    ------
+    ValueError
+        Jika `model` bukan instance dari `tf.keras.Model` atau 
+        `tf.keras.Sequential`.
+    
+    Returns
+    -------
+    float
+        Jumlah total FLOPs yang dibutuhkan model untuk melakukan inferensi pada 
+        satu input, dikembalikan dalam unit FLOP.
+
+    """
+
+    # Validasi input
+    if not isinstance(
+        model, (tf.keras.models.Sequential, tf.keras.models.Model)
+    ):
+        raise ValueError(
+            "Calculating FLOPS is only supported for "
+            "`tf.keras.Model` and `tf.keras.Sequential` instances."
+        )
+
+    from tensorflow.python.framework.convert_to_constants import (
+        convert_variables_to_constants_v2_as_graph,
+    )
+
+    # Atur agar FLOP yang dihitung hanya untuk 1 operasi.
+    batch_size = 1
+    inputs = [
+        tf.TensorSpec([batch_size] + inp.shape[1:], inp.dtype)
+        for inp in model_inputs
+    ]
+
+    # Bekukan grafik agar dapat dihitung FLOP-nya oleh profiler.
+    real_model = tf.function(model).get_concrete_function(inputs)
+    frozen_func, _ = convert_variables_to_constants_v2_as_graph(real_model)
+
+    # Kalkulasi FLOPs dengan tf.profiler
+    run_meta = tf.compat.v1.RunMetadata()
+    opts = (
+        tf.compat.v1.profiler.ProfileOptionBuilder(
+            tf.compat.v1.profiler.ProfileOptionBuilder().float_operation()
+        )
+        .with_empty_output()
+        .build()
+    )
+
+    flops = tf.compat.v1.profiler.profile(
+        graph=frozen_func.graph, run_meta=run_meta, cmd="scope", options=opts
+    )
+    tf.compat.v1.reset_default_graph()
+    
+    return (flops.total_float_ops)
 
 # def plot_confusion_matrix(model, test_generator, class_labels, text_rotation=45):
 #     """
@@ -81,9 +150,12 @@ def plot_confusion_matrix(predictions, true_classes, class_labels, rotation=0):
     return conf_matrix
 
 
-def plot_loss(history):
+def plot_loss(history, title=None):
     # Plot training loss vs. validation loss
     plt.figure(figsize=(12, 4))
+    
+    if title:
+        plt.suptitle(title, fontsize=16)
     
     # Plot Training Loss
     plt.subplot(1, 2, 1)

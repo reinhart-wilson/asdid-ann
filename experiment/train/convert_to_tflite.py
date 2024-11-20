@@ -35,11 +35,12 @@ converter.experimental_new_converter = True
 tflite_model = converter.convert()
 
 # Simpan model tflite
-# tflite_filename = os.path.join(
-#     config.RESULT_PATH, 
-#     f"model_at_epoch_{at_epoch}.tflite")
-# with open(tflite_filename,'wb') as f:
-#     f.write(tflite_model)
+tflite_filename = os.path.join(
+    config.RESULT_PATH, 
+    # f"model_at_epoch_{at_epoch}.tflite")
+    "SoybeanMobileNet.tflite")
+with open(tflite_filename,'wb') as f:
+    f.write(tflite_model)
 
 # Metadata informasi model
 model_metadata = _metadata_fb.ModelMetadataT()
@@ -66,12 +67,12 @@ input_normalization = _metadata_fb.ProcessUnitT()
 input_normalization.optionsType = (
     _metadata_fb.ProcessUnitOptions.NormalizationOptions)
 input_normalization.options = _metadata_fb.NormalizationOptionsT()
-input_normalization.options.mean = [0] # (Nilai masukan - mean) / std
-input_normalization.options.std = [1]
+input_normalization.options.mean = [0.0] # (Nilai masukan - mean) / std
+input_normalization.options.std = [255.0]
 input_metadata.processUnits = [input_normalization]
 input_stats = _metadata_fb.StatsT()
-input_stats.max = [1]
-input_stats.min = [0]
+input_stats.max = [1.0]
+input_stats.min = [0.0]
 input_metadata.stats = input_stats
 
 # Metadata informasi output
@@ -105,8 +106,7 @@ b.Finish(
 metadata_buf = b.Output()
 
 # Menambahkan metadata ke model tflite
-model_file = ("C:/Users/reinh/Documents/GitHub/asdid-ann/tflite models/v1/"
-              "model_at_epoch_150.tflite")
+model_file = (tflite_filename)
 populator = _metadata.MetadataPopulator.with_model_file(model_file)
 populator.load_metadata_buffer(metadata_buf)
 populator.load_associated_files(["label.txt"])

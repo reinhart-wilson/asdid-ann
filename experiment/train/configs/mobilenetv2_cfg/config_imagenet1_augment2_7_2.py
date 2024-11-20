@@ -11,7 +11,7 @@ Konfigurasi yang terinspirasi oleh konfigurasi MobileNetV2 yang dipakai untuk
 tugas klasifikasi ImageNet.  menggunakan augmentasi. Memperbaiki cosine decay.
 
 Config ini persis dengan config 2.7, hanya dimodifikasi untuk menguji error 
-konversi ke tflite
+konversi ke tflite (error karena kesalahan format file model yang disimpan)
 """
 
 from os import path

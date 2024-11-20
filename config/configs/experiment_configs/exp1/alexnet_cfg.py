@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Oct 11 12:24:48 2024
+Created on Wed Jun  5 23:51:11 2024
 
 @author: reinh
 """
 
 from os import path
+import time
 
 SEED = 42
-CFG_NUM = 2
-USE_GPU= True
+CFG_NUM = 3
+USE_GPU = True
 DATA_PATH = "../../dataset/split_prepped_data"
 
 # Parameter umum
@@ -21,19 +22,18 @@ LEARNING_RATE   = 1e-4
 NUM_CLASSES     = 8
 AUGMENT = False
 
+
 # Parameter spesifik arsitektur
 MODEL_CONFIG = {
-    'model_name': 'originalmobilenetv2',
-    'alpha'     : 1.0,
-    'dense'     : 1024
+    'model_name' : 'alexnet'
     }
-
 RESULT_PATH = f"./training_result/exp1/{MODEL_CONFIG['model_name']}/{CFG_NUM}"
 
+
 # Args untuk callbacks
-SAVE_INTERVAL   = 10
+SAVE_INTERVAL   = 5
 HISTORY_FILENAME= 'history_at_epoch{epoch}.pkl'
-MODEL_FILENAME= 'model_at_last_epoch.keras'
+MODEL_FILENAME  = 'model_at_epoch{epoch}.keras'
 
 # Callbacks 
 CALLBACKS_CONFIG = {
@@ -41,11 +41,8 @@ CALLBACKS_CONFIG = {
         'interval' : SAVE_INTERVAL,
         'save_path' : path.join(RESULT_PATH, HISTORY_FILENAME)
     },
-    # 'model_checkpoint' : {
-    #     'interval' : SAVE_INTERVAL,
-    #     'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
-    # },
-    'save_best':{
-        'save_path' : path.join(RESULT_PATH)  
+    'model_checkpoint' : {
+        'interval' : SAVE_INTERVAL,
+        'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
     }
 }

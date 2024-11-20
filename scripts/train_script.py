@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov 20 12:37:56 2024
+
+@author: reinh
+"""
+
 import sys
 import os
 import logging
@@ -8,12 +15,14 @@ logging.getLogger('absl').setLevel(logging.ERROR)
 
 # Menambahkan path src ke Python path agar modul-modul dalam source code dapat dipanggil
 working_dir = os.path.abspath(os.path.dirname(__file__))
-src_dir = os.path.join(working_dir, '..', '..', 'src')
+src_dir = os.path.join(working_dir, '..', 'src')
+configs_dir = os.path.join(working_dir, '..', 'config')
 sys.path.append(src_dir)
+sys.path.append(configs_dir)
 
 # Import file konfigurasi
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_4 as config
-from configs import data_location as dataloc
+from configs.experiment_configs.exp1 import mobilenetv2_cfg as config
+from configs.other_configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
 from utils import general_utils as gutils
@@ -48,7 +57,8 @@ def load_data(augment=False):
 
 # def train():    
     # Buat callbacks
-model_callbacks = tutils.generate_callbacks(config.CALLBACKS_CONFIG)
+# model_callbacks = tutils.generate_callbacks(config.CALLBACKS_CONFIG)
+model_callbacks = []
 tensorboard_callback = callbacks.TensorBoard(log_dir=config.LOGDIR)
 model_checkpoint = callbacks.ModelCheckpoint(
     os.path.join(config.RESULT_PATH, config.MODEL_FILENAME),
@@ -79,13 +89,13 @@ else:
         )    
 
 
-LR_SCHEDULE = optimizers.schedules.CosineDecay(
-    initial_learning_rate=config.LEARNING_RATE,
-    alpha = config.LR_ALPHA,
-    decay_steps=decay_steps
-)
-OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
-# OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
+# LR_SCHEDULE = optimizers.schedules.CosineDecay(
+#     initial_learning_rate=config.LEARNING_RATE,
+#     alpha = config.LR_ALPHA,
+#     decay_steps=decay_steps
+# )
+# OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
+OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
 
 # Training
 model = create_model(config.INPUT_SHAPE, config.NUM_CLASSES, config.MODEL_CONFIG)

@@ -5,6 +5,7 @@ from time import time
 from callbacks.callbacks_factory import create_callback
 from sklearn.utils import class_weight as cw
 from collections import Counter
+import tensorflow as tf
 
 def load_history(file_path):
     with open(file_path,'rb') as file:
@@ -84,3 +85,25 @@ def train_model(model, train_datagen, val_datagen, total_epochs,
     
     return history
         
+def get_last_lr_from_tensorboard(events_path):
+    """
+    Mendapatkan learning rate terakhir dari log tensorboard
+
+    Parameters
+    ----------
+    events_path : str
+        Path file events Tensorboard.
+
+    Returns
+    -------
+    lr_tensor : numpy.ndarray
+        Array numpy 0 dimensi berisi learning rate terakhir.
+
+    """
+    sums = tf.compat.v1.train.summary_iterator(events_path)
+    for e in sums:
+        for value in e.summary.value:
+            if value.tag == 'epoch_learning_rate':  # or the tag name used for your LR
+                lr_tensor = tf.make_ndarray(value.tensor)
+    return lr_tensor
+

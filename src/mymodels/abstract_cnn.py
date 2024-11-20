@@ -19,7 +19,9 @@ class AbstractCNN(ABC):
     def build_model(self):
         pass
     
-    def compile_model(self, optimizer=Adam(), loss='categorical_crossentropy',
+    def compile_model(self, 
+                      optimizer=Adam(), 
+                      loss='categorical_crossentropy',
                       metrics=['accuracy']):
         if self.model is None:
             self.build_model()
@@ -58,5 +60,8 @@ class AbstractCNN(ABC):
         
     def show_summary(self):
         self.model.summary()
+        
+    def get_tf_model (self):
+        return self.model
 
         

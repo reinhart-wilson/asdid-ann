@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Oct 11 12:24:48 2024
+Menggunakan dataset vanilla namun sudah di-resize dan di-crop
+"""
 
-@author: reinh
-"""
 
 from os import path
 
 SEED = 42
-CFG_NUM = 2
+CFG_NUM = 3
 USE_GPU= True
 DATA_PATH = "../../dataset/split_prepped_data"
 
@@ -23,7 +21,7 @@ AUGMENT = False
 
 # Parameter spesifik arsitektur
 MODEL_CONFIG = {
-    'model_name': 'originalmobilenetv2',
+    'model_name': 'originalmobilenetv1',
     'alpha'     : 1.0,
     'dense'     : 1024
     }
@@ -33,7 +31,7 @@ RESULT_PATH = f"./training_result/exp1/{MODEL_CONFIG['model_name']}/{CFG_NUM}"
 # Args untuk callbacks
 SAVE_INTERVAL   = 10
 HISTORY_FILENAME= 'history_at_epoch{epoch}.pkl'
-MODEL_FILENAME= 'model_at_last_epoch.keras'
+MODEL_FILENAME= 'model_at_epoch{epoch}.keras'
 
 # Callbacks 
 CALLBACKS_CONFIG = {
@@ -41,11 +39,8 @@ CALLBACKS_CONFIG = {
         'interval' : SAVE_INTERVAL,
         'save_path' : path.join(RESULT_PATH, HISTORY_FILENAME)
     },
-    # 'model_checkpoint' : {
-    #     'interval' : SAVE_INTERVAL,
-    #     'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
-    # },
-    'save_best':{
-        'save_path' : path.join(RESULT_PATH)  
+    'model_checkpoint' : {
+        'interval' : SAVE_INTERVAL,
+        'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
     }
 }

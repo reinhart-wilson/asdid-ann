@@ -165,3 +165,7 @@ cython_debug/
 /experiment/train/scrapped/
 /dataset/
 /experiment/train/training_result
+/training_result
+/scripts/training_result
+/tflite models
+/tflite models

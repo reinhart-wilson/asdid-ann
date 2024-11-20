@@ -18,7 +18,7 @@ sys.path.append(train_dir)
 
 
 from configs import data_location as dataloc
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_2 as config
+from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_4 as config
 
 from utils import general_utils as gutils
 # gutils.use_gpu(False)
@@ -27,10 +27,11 @@ import numpy as np
 from keras.models import load_model
 from utils import evaluation_utils as eutils
 from sklearn.metrics import classification_report
+from PIL import Image
 
 
 def main():  
-    at_epoch = 150
+    at_epoch = 200
     config_num = config.CFG_NUM
     result_folder = f'config{config_num}'
     result_path = os.path.join(train_dir, 'training_result', 
@@ -46,8 +47,8 @@ def main():
     # eutils.plot_lr(history)
     # 
     test_data_dir = os.path.join(dataloc.DATA_PATH, 'test')
-    # test_data_dir = os.path.join(dataloc.DATA_PATH, 'validation')
-    test_data_dir = dataloc.ADDITIONAL_DATA_PATH
+    test_data_dir = os.path.join(dataloc.DATA_PATH, 'validation')
+    test_data_dir = os.path.join(dataloc.ADDITIONAL_DATA__2_PATH, 'test')
     test_generator = gutils.make_datagen(test_data_dir, config.IMAGE_SIZE, 
                                         config.BATCH_SIZE, shuffle=False)
     
@@ -57,7 +58,7 @@ def main():
     print(f'Test Loss: {loss}')
     print(f'Test Accuracy: {accuracy}')
     
-    # 
+    # # 
     class_labels = list(test_generator.class_indices.keys())
     print(class_labels)
     predictions = model.predict(test_generator)
@@ -70,7 +71,17 @@ def main():
     report = classification_report(true_classes, predicted_classes, target_names=class_labels)
     print(report)
 
-    
+    # # predict single image
+    # image_filename = 'add_bacterial_blight_177.jpeg'
+    # image_path = os.path.join(dataloc.BASE_PATH, 'bb', image_filename)
+    # img = keras.utils.load_img('drive/MyDrive/abcdef.jpg', target_size=image_size)
+    # img_array = keras.utils.img_to_array(img)
+    # img_array = tf.expand_dims(img_array, 0)  # Create batch axis
+    # img_predictions = model.predict(image)
+    # predicted_class = np.argmax(img_predictions, axis=1)
+    # print(class_labels[predicted_class[0]])
+
+
 if __name__ == "__main__":
     main()
     

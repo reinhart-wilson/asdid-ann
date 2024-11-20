@@ -16,7 +16,7 @@ from os import path
 from tensorflow.keras import optimizers
 
 # SEED = 42
-CFG_NUM = 'imagenet1_augment2.7_4'
+CFG_NUM = 'imagenet1_augment2.7_5'
 USE_GPU= True
 DATA_PATH = "../../dataset/split_prepped_data _with_added_data_all_class"
 
