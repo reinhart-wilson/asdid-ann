@@ -21,7 +21,7 @@ sys.path.append(src_dir)
 sys.path.append(configs_dir)
 
 # Import file konfigurasi
-from configs.experiment_configs.exp1 import mobilenetv2_cfg as config
+from configs.experiment_configs.exp1 import mobilenetv1_cfg as config
 from configs.other_configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
