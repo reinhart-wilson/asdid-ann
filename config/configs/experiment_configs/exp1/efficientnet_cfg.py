@@ -1,48 +1,53 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct 21 10:20:22 2024
+Created on Fri Oct 11 12:24:48 2024
 
-@author: rafae
+@author: reinh
 """
 
 from os import path
-import time
 
 SEED = 42
-CFG_NUM = 1
-USE_GPU = True
-DATA_PATH = "../../dataset/split_prepped_data"
+CFG_NUM = 3
+USE_GPU= True
+DATA_PATH = "../dataset/split_prepped_data"
 
 # Parameter umum
 BATCH_SIZE      = 10
 EPOCHS          = 100 
 IMAGE_SIZE      = (224, 224)  
 INPUT_SHAPE     = tuple(list(IMAGE_SIZE) + [3])
-LEARNING_RATE   = 0.0001
+LEARNING_RATE   = 1e-4
 NUM_CLASSES     = 8
-AUGMENT=False
+AUGMENT = False
+N_GRADIENTS     = 0
 
 
 # Parameter spesifik arsitektur
 MODEL_CONFIG = {
     'model_name' : 'efficientnet'
     }
-RESULT_PATH = f"./training_result/exp1/{MODEL_CONFIG['model_name']}/{CFG_NUM}"
+RESULT_PATH = f"../training_result/exp1/{MODEL_CONFIG['model_name']}/{CFG_NUM}"
 
-
+LOGDIR = path.join(RESULT_PATH, "logs")
 # Args untuk callbacks
-SAVE_INTERVAL   = 5
+SAVE_INTERVAL   = 10
 HISTORY_FILENAME= 'history_at_epoch{epoch}.pkl'
-MODEL_FILENAME  = 'model_at_epoch{epoch}.keras'
+MODEL_FILENAME= 'model_at_epoch{epoch}.tf'
+BEST_MODEL_FILENAME= 'best_model.h5'
 
 # Callbacks 
 CALLBACKS_CONFIG = {
-    'history_saver' : {
-        'interval' : SAVE_INTERVAL,
-        'save_path' : path.join(RESULT_PATH, HISTORY_FILENAME)
-    },
-    'model_checkpoint' : {
-        'interval' : SAVE_INTERVAL,
-        'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
+    # 'history_saver' : {
+    #     'interval' : SAVE_INTERVAL,
+    #     'save_path' : path.join(RESULT_PATH, HISTORY_FILENAME)
+    # },
+    # # 'model_checkpoint' : {
+    # #     'interval' : SAVE_INTERVAL,
+    # #     'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
+    # # },
+    'save_best':{
+        'save_path' : path.join(RESULT_PATH, BEST_MODEL_FILENAME),
+        'monitor': 'val_loss'
     }
 }
