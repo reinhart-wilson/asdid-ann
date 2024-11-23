@@ -16,7 +16,7 @@ def create_callback(cb_name, cfg_dict):
                                period = cfg_dict['interval'])
     elif cb_name == 'save_best':
         best_model_checkpoint = ModelCheckpoint(
-            filepath=cfg_dict['save_path'] + '/best_model.h5',
+            filepath=cfg_dict['save_path'],
             monitor='val_loss',  # Change to your preferred metric
             save_best_only=True,
             mode='min',  # Use 'min' if monitoring loss
