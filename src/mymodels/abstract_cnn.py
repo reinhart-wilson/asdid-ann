@@ -40,10 +40,10 @@ class AbstractCNN(ABC):
                        class_weight=class_weights)
         return history
     
-    def evaluate(self, test_data):
+    def evaluate(self, test_data, verbose='auto'):
         if self.model is None:
             raise ValueError("Model has not been built.")
-        return self.model.evaluate(test_data)
+        return self.model.evaluate(test_data, verbose=verbose)
     
     def predict(self, input_data):
         if self.model is None:
