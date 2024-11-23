@@ -21,7 +21,7 @@ sys.path.append(src_dir)
 sys.path.append(configs_dir)
 
 # Import file konfigurasi
-from configs.experiment_configs.exp1 import mobilenetv1_cfg as config
+from configs.experiment_configs.exp1 import squeezenet_cfg as config
 from configs.other_configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
@@ -50,15 +50,18 @@ def load_data(augment=False):
     # train_data_dir = dataloc.ADDITIONAL_DATA_PATH
     val_data_dir = os.path.join(config.DATA_PATH, 'validation')
     # val_data_dir=dataloc.ADDITIONAL_DATA_PATH
-    train_datagen = gutils.make_datagen(train_data_dir, config.IMAGE_SIZE, config.BATCH_SIZE,
+    train_datagen = gutils.make_datagen(train_data_dir, config.IMAGE_SIZE, 
+                                        config.BATCH_SIZE,
                                         augment=augment)
-    val_datagen = gutils.make_datagen(val_data_dir, config.IMAGE_SIZE, config.BATCH_SIZE)
+    val_datagen = gutils.make_datagen(val_data_dir, config.IMAGE_SIZE, 
+                                      config.BATCH_SIZE,
+                                      shuffle=False)
     return train_datagen, val_datagen
 
 # def train():    
     # Buat callbacks
-# model_callbacks = tutils.generate_callbacks(config.CALLBACKS_CONFIG)
-model_callbacks = []
+model_callbacks = tutils.generate_callbacks(config.CALLBACKS_CONFIG)
+model_callbacks = model_callbacks if model_callbacks is not None else []
 tensorboard_callback = callbacks.TensorBoard(log_dir=config.LOGDIR)
 model_checkpoint = callbacks.ModelCheckpoint(
     os.path.join(config.RESULT_PATH, config.MODEL_FILENAME),
@@ -101,7 +104,7 @@ OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
 model = create_model(config.INPUT_SHAPE, config.NUM_CLASSES, config.MODEL_CONFIG)
 model.build_model()
 model.compile_model(optimizer=OPTIMIZER,
-                    metrics = ['accuracy', metrics.Recall()])
+                    metrics = ['accuracy', metrics.Recall(name='recall')])
 history = model.train(train_datagen, val_datagen, epochs = config.EPOCHS, 
             batch_size=config.BATCH_SIZE,callbacks=model_callbacks, 
             class_weights=None ) #class_weights)
