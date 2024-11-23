@@ -3,6 +3,7 @@ from .lenet import LeNet
 from .mobilenetv1 import MyMobileNetV1, OriginalMobileNet
 from .mobilenetv2 import MyMobileNetV2, OriginalMobileNetV2
 from .mobilenetv3 import MyMobileNetV3
+from .squeezenet import OriginalSqueezeNet
 from .efficientnet import EfficientNet
 from .efficientnetv2 import EfficientNetV2
 from .vgg16 import VGG16
@@ -24,6 +25,8 @@ def create_model(input_shape, num_classes, model_config_dict):
                            num_classes, 
                            alpha = model_config_dict['alpha'],
                            dense_neuron_num= model_config_dict['dense'])
+    elif model_name == 'originalsqueezenet':
+        return OriginalSqueezeNet(input_shape, num_classes)
     elif model_name == 'mobilenetv2':
         weights = model_config_dict.get('weights', None)  # Default is None
         dropout = model_config_dict.get('dropout', 0.0)  # Default dropout rate is 0.0
