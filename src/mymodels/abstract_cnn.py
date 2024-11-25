@@ -6,6 +6,7 @@ Created on Mon Jun  3 22:05:18 2024
 """
 
 from abc import ABC, abstractmethod
+from keras import models
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 
@@ -16,8 +17,26 @@ class AbstractCNN(ABC):
         self.model = None
     
     @abstractmethod
-    def build_model(self):
+    def build_model(self, include_classification_head=True):
         pass
+    
+    def add_layers(self, layers):
+        # Jika model menggunakan Sequential API
+        if isinstance(self.model, models.Sequential):
+            for new_layer in layers:
+                self.model.add(new_layer)
+        # Untuk model Functional API         
+        else:            
+            # Ambil output dari model yang sudah ada
+            x = self.model.output
+            
+            # Tambahkan layer baru
+            for new_layer in layers:
+                x = new_layer(x)
+            
+            # Buat model baru dengan input dan output baru
+            self.model = models.Model(inputs=self.model.input, outputs=x)
+            
     
     def compile_model(self, 
                       optimizer=Adam(), 
