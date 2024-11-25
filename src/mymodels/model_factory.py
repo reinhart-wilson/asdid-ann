@@ -3,7 +3,7 @@ from .lenet import LeNet
 from .mobilenetv1 import MyMobileNetV1, OriginalMobileNet
 from .mobilenetv2 import MyMobileNetV2, OriginalMobileNetV2
 from .mobilenetv3 import MyMobileNetV3
-from .squeezenet import OriginalSqueezeNet
+from .squeezenet import MySqueezeNet
 from .nasnetmobile import OriginalNasNetMobile
 from .efficientnet import EfficientNet
 from .efficientnetv2 import EfficientNetV2
@@ -27,7 +27,7 @@ def create_model(input_shape, num_classes, model_config_dict):
                            alpha = model_config_dict['alpha'],
                            dense_neuron_num= model_config_dict['dense'])
     elif model_name == 'originalnasnetmobile':
-        return OriginalSqueezeNet(input_shape, num_classes)
+        return MySqueezeNet(input_shape, num_classes)
     elif model_name == 'originalsqueezenet':
         return OriginalNasNetMobile(input_shape, num_classes)
     elif model_name == 'mobilenetv2':
