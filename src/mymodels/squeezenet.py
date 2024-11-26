@@ -7,13 +7,14 @@ class MySqueezeNet(AbstractCNN):
     
     def build_model(self, 
                     include_classification_head=True, 
-                    include_top = False):   
+                    include_top = False,
+                    pooling = 'avg'):   
          
         base_model = SqueezeNet(
             include_top=include_top, 
             weights=None,
             input_shape=self.input_shape,
-            pooling='avg',
+            pooling=pooling,
             classes=self.num_classes
         )
         
