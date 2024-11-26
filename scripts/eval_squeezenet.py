@@ -23,21 +23,25 @@ from utils import general_utils as gutils
 from PIL import Image
 from sklearn.metrics import classification_report
  
-# Paths
-EXP_NUM                 = 3
-SAVE_PATH               = f'../training_result/squeezenet/{EXP_NUM}'
-BEST_MODEL_FILENAME     = 'best_model.tf'
-LATEST_MODEL_FILENAME   = 'last_model.tf'
-LOGDIR                  = os.path.join(SAVE_PATH, 'logs')
-MODEL_PATH              = os.path.join(SAVE_PATH, 
-                                       BEST_MODEL_FILENAME)
-
 # Params
-batch_size  = 32
+batch_size  = 128
+epoch = 287
+
+# Paths
+PARAM_VAL               = 256
+TUNED_PARAM             = 'dense'
+SAVE_PATH               = f'../training_result/squeezenet/{TUNED_PARAM}/{PARAM_VAL}'
+BEST_MODEL_FILENAME     = 'best_model_epoch_{epoch}.tf'
+LAST_MODEL_FILENAME     = 'model_at_{epoch}.tf'
+LATEST_MODEL_FILENAME   = 'latest_model.tf'
+LOGDIR                  = os.path.join(SAVE_PATH, "logs")
+MODEL_PATH              = os.path.join(SAVE_PATH, 
+                                       BEST_MODEL_FILENAME.format(epoch=epoch))
+
 
 test_data_dir = os.path.join(dinfo.DATA_PATH, 'test')
-# test_data_dir = os.path.join(dinfo.DATA_PATH, 'validation')
-test_data_dir = os.path.join(dinfo.ADDITIONAL_DATA__2_PATH, 'test')
+test_data_dir = os.path.join(dinfo.DATA_PATH, 'validation')
+# test_data_dir = os.path.join(dinfo.EXTENDED_DATA_PATH, 'test')
 test_generator = gutils.make_datagen(test_data_dir, 
                                      dinfo.IMG_RES, 
                                      batch_size, 
