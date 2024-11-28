@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 import pickle
 import tensorflow as tf
+from tensorflow.python.summary.summary_iterator import summary_iterator
 from sklearn.metrics import  ConfusionMatrixDisplay, confusion_matrix
 
 def load_history(file_path):
@@ -9,8 +11,49 @@ def load_history(file_path):
         history = pickle.load(file)
     return history
 
-def predict():
-    pass
+
+
+def extract_metrics_from_logs(log_dir, loss_key='epoch_loss', 
+                              acc_key='epoch_accuracy', 
+                              recall_key='epoch_recall'):
+    """
+    Extracts the lowest loss, highest accuracy, and highest recall from TensorBoard logs.
+    
+    Args:
+        log_dir (str): Directory containing TensorBoard log files.
+        loss_key (str): Key for loss metric in TensorBoard logs.
+        acc_key (str): Key for accuracy metric in TensorBoard logs.
+        recall_key (str): Key for recall metric in TensorBoard logs.
+    
+    Returns:
+        dict: A dictionary with the lowest loss, highest accuracy, and highest recall.
+    """
+    lowest_loss = float('inf')
+    highest_accuracy = float('-inf')
+    highest_recall = float('-inf')
+    
+    # Iterate over all event files in the log directory
+    for file_name in os.listdir(log_dir):
+        file_path = os.path.join(log_dir, file_name)
+        
+        # Parse the event file
+        for event in summary_iterator(file_path):
+            
+            for value in event.summary.value:
+                
+                if value.tag == loss_key:
+                    lowest_loss = min(lowest_loss, float(tf.make_ndarray(value.tensor)))
+                elif value.tag == acc_key:
+                    highest_accuracy = max(highest_accuracy, float(tf.make_ndarray(value.tensor)))
+                elif value.tag == recall_key or value.tag == recall_key+'_1' or value.tag == recall_key+'_2':
+                    highest_recall = max(highest_recall, float(tf.make_ndarray(value.tensor)))
+                    
+    
+    return {
+        'lowest_loss': lowest_loss,
+        'highest_accuracy': highest_accuracy,
+        'highest_recall': highest_recall
+    }
 
 def get_flops(model, model_inputs) -> float:
     """

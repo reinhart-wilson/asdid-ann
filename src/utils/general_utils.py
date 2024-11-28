@@ -3,7 +3,7 @@ import os
 import random
 import sys
 import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
 from callbacks.callbacks_factory import create_callback
 
@@ -24,7 +24,7 @@ def adjust_contrast_and_brightness(image):
     image = tf.image.random_contrast(image, lower=0.9, upper=1.1)
     return image
     
-def make_datagen(directory, image_size, batch_size, seed=42, shuffle=True, 
+def make_datagen(directory, image_size, batch_size, seed=None, shuffle=True, 
                  augment=False):
         
     if augment:
