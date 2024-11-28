@@ -14,7 +14,8 @@ from os import path
 from tensorflow.keras import optimizers
 
 # SEED = 42
-CFG_NUM = 'top_1'
+CFG_NUM = 1024*0.5
+VARIABLE = 'top_layer_dense'
 USE_GPU= True
 DATA_PATH = "../../dataset/split_prepped_data _with_added_data_all_class"
 DATA_PATH = "../../dataset/split_prepped_data"
@@ -23,9 +24,9 @@ DATA_PATH = "../../dataset/split_prepped_data"
 IMAGE_SIZE      = (224, 224)  
 INPUT_SHAPE     = tuple(list(IMAGE_SIZE) + [3])
 NUM_CLASSES     = 8
-BATCH_SIZE      = 10
+BATCH_SIZE      = 12
 EPOCHS          = 200
-LEARNING_RATE   = 0.005
+LEARNING_RATE   = 1e-4
 DECAY_STEPS     = EPOCHS
 AUGMENT         = True
 LR_ALPHA        = 1e-2
@@ -35,12 +36,12 @@ N_GRADIENTS = 0
 MODEL_CONFIG = {
     'model_name': 'mobilenetv2',
     'alpha'     : 1.0,
-    'dense'     : 1024,
+    'dense'     : 1024*0.5,
     'dropout'   : 0,
     'weight_decay':4e-5
     }
 
-RESULT_PATH = f"./training_result/{MODEL_CONFIG['model_name']}/config{CFG_NUM}"
+RESULT_PATH = f"./training_result/{MODEL_CONFIG['model_name']}/{VARIABLE}/{CFG_NUM}"
 
 # Args untuk callbacks
 SAVE_INTERVAL   = 2
@@ -59,5 +60,8 @@ CALLBACKS_CONFIG = {
     #     'interval' : SAVE_INTERVAL,
     #     'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
     # },
-    'learning_rate_logger':{}
+    'learning_rate_logger':{},
+    'save_latest': {
+        'save_path' : path.join(RESULT_PATH, MODEL_FILENAME)
+        }
 }

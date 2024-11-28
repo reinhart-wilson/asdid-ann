@@ -12,7 +12,7 @@ src_dir = os.path.join(working_dir, '..', '..', 'src')
 sys.path.append(src_dir)
 
 # Import file konfigurasi
-from configs.mobilenetv2_cfg import config_imagenet1_augment2_7_4 as config
+from configs.mobilenetv2_cfg import config_top_1 as config
 from configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
@@ -84,14 +84,14 @@ LR_SCHEDULE = optimizers.schedules.CosineDecay(
     alpha = config.LR_ALPHA,
     decay_steps=decay_steps
 )
-OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
-# OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
+# OPTIMIZER = optimizers.SGD(learning_rate=LR_SCHEDULE, momentum=0.9)
+OPTIMIZER = optimizers.Adam(learning_rate=config.LEARNING_RATE)
 
 # Training
 model = create_model(config.INPUT_SHAPE, config.NUM_CLASSES, config.MODEL_CONFIG)
 model.build_model()
 model.compile_model(optimizer=OPTIMIZER,
-                    metrics = ['accuracy', metrics.Recall()])
+                    metrics = ['accuracy', metrics.Recall(name='recall')])
 history = model.train(train_datagen, val_datagen, epochs = config.EPOCHS, 
             batch_size=config.BATCH_SIZE,callbacks=model_callbacks, 
             class_weights=None ) #class_weights)
