@@ -1,8 +1,10 @@
 import sys, os
 
 working_dir = os.path.abspath(os.path.dirname(__file__))
+configs_dir = os.path.join(working_dir, '..', '..', 'config')
 src_dir = os.path.join(working_dir, '..', '..', 'src')
 sys.path.append(src_dir)
+sys.path.append(configs_dir)
 
 # Set mixed precision
 from utils import general_utils as gutils
@@ -18,7 +20,7 @@ from utils import training_utils as tutils
 epoch       = 200
 lr          = 1e-4
 batch_size  = 16*6
-dense       = 512 # Currently tuning
+dense       = 512*2 # Currently tuning
 dropout     = 0
 weights     = None
 wdecay      = 0
@@ -27,7 +29,7 @@ lr_config   = {
     'init_value' : 1e-4,
     'scheduler_config' : {
         'name' : 'cosine_decay',
-        'alpha' : 1e-2,
+        'lr_alpha' : 1e-2,
         'epochs_to_decay' : epoch
     }
 }
@@ -35,7 +37,7 @@ lr_config   = {
 # Paths
 PARAM_VAL               = dense
 TUNED_PARAM             = 'top_layers_dense'
-SAVE_PATH               = f'../training_result/mobilenetv2/{TUNED_PARAM}/{PARAM_VAL}'
+SAVE_PATH               = f'../../training_result/mobilenetv2/{TUNED_PARAM}/{PARAM_VAL}'
 BEST_MODEL_FILENAME     = 'best_model_epoch.tf'
 LAST_MODEL_FILENAME     = 'model_at_{epoch}.tf'
 LATEST_MODEL_FILENAME   = 'latest_model.tf'
@@ -63,8 +65,7 @@ model = MyMobileNetV2(dinfo.IMG_DIM,
                       weight_decay=wdecay,
                       alpha=alpha
                       )
-model.build_model(include_classification_head=False, include_top=True,
-                  weights='imagenet')
+model.build_model()
 
 # Callbacks
 model_callbacks = [
@@ -76,7 +77,7 @@ model_callbacks = [
         mode='min', 
         save_weights_only=False
     ),
-    SaveLatestModel(filepath=os.path.join(SAVE_PATH, LATEST_MODEL_FILENAME))
+    # SaveLatestModel(os.path.join(SAVE_PATH, LATEST_MODEL_FILENAME))
 ]
 
 # Learning Rate
@@ -84,7 +85,7 @@ if 'scheduler_config' in lr_config:
     lr_scheduler_config = lr_config['scheduler_config']
     if lr_scheduler_config['name'] == 'cosine_decay':
         decay_steps = tutils.compute_decay_steps(
-            train_datagen.sample,                                                  
+            train_datagen.samples,                                                  
             batch_size,                                                  
             lr_scheduler_config['epochs_to_decay'])
         lr = optimizers.schedules.CosineDecay(
