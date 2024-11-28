@@ -1,5 +1,6 @@
 from .history_saver import HistorySaver
 from .learning_rate_logger import LearningRateLogger
+from .save_latest_model import SaveLatestModel
 from keras.callbacks import ModelCheckpoint
 
 def create_callback(cb_name, cfg_dict):
@@ -23,5 +24,7 @@ def create_callback(cb_name, cfg_dict):
             save_weights_only=False
         )
         return best_model_checkpoint
+    elif cb_name == 'save_latest':
+        return SaveLatestModel( cfg_dict['save_path'])
     else:
         raise ValueError(f"Callback {cb_name} is not recognized.")
