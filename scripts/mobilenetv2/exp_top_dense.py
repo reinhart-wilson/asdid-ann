@@ -11,16 +11,16 @@ from utils import general_utils as gutils
 gutils.use_mixed_precision()
 
 from callbacks.save_latest_model import SaveLatestModel
+from callbacks.learning_rate_logger import LearningRateLogger
 from configs.other_configs import data_info as dinfo
 from mymodels.mobilenetv2 import MyMobileNetV2
 from tensorflow.keras import optimizers, metrics, callbacks, layers, regularizers 
 from utils import training_utils as tutils
 
 # Params
-mode        = 0 # 0 cont 1 train
-last_epoch  = 0
+mode        = 1 # 0 cont 1 train
+last_epoch  = 97
 epoch       = 200
-lr          = 1e-4
 batch_size  = 12
 dense       = 512*2 # Currently tuning
 dropout     = 0
@@ -29,11 +29,11 @@ wdecay      = 0
 alpha       = 1.0 # Bukan learning rate
 lr_config   = {
     'init_value' : 1e-4,
-    'scheduler_config' : {
-        'name' : 'cosine_decay',
-        'lr_alpha' : 1e-2,
-        'epochs_to_decay' : epoch
-    }
+    # 'scheduler_config' : {
+    #     'name' : 'cosine_decay',
+    #     'lr_alpha' : 1e-2,
+    #     'epochs_to_decay' : epoch
+    # }
 }
 
 # Paths
@@ -60,14 +60,15 @@ val_datagen = gutils.make_datagen(val_data_dir,
 # Callbacks
 model_callbacks = [
     callbacks.TensorBoard(log_dir=LOGDIR),
-    callbacks.ModelCheckpoint(
-        filepath=os.path.join(SAVE_PATH, BEST_MODEL_FILENAME),
-        monitor='val_loss',
-        save_best_only=True,
-        mode='min', 
-        save_weights_only=False
-    ),
-    # SaveLatestModel(os.path.join(SAVE_PATH, LATEST_MODEL_FILENAME))
+    # callbacks.ModelCheckpoint(
+    #     filepath=os.path.join(SAVE_PATH, BEST_MODEL_FILENAME),
+    #     monitor='val_loss',
+    #     save_best_only=True,
+    #     mode='min', 
+    #     save_weights_only=False
+    # ),
+    SaveLatestModel(os.path.join(SAVE_PATH, LATEST_MODEL_FILENAME)),
+    LearningRateLogger()
 ]
 
 # Definisi model
