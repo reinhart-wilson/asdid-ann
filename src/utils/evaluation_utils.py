@@ -1,8 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 import os
+import pandas as pd
 import pickle
 import tensorflow as tf
+from matplotlib.ticker import MultipleLocator
 from tensorflow.python.summary.summary_iterator import summary_iterator
 from sklearn.metrics import  ConfusionMatrixDisplay, confusion_matrix
 
@@ -11,6 +14,55 @@ def load_history(file_path):
         history = pickle.load(file)
     return history
 
+def show_tensorboard_plots(tensorboard_data_path, csv_files, labels, 
+                           epochs_monitored, show_legend=False, line_colors=None):
+    metrics = ['Akurasi', 'Loss', 'Recall']
+    
+    for metric in metrics:
+        data_path = os.path.join(tensorboard_data_path, metric)
+        
+        # Loop through each file and plot the data
+        for i, (csv_file, label) in enumerate(zip(csv_files, labels)):
+            # Load CSV file
+            data = pd.read_csv(os.path.join(data_path, csv_file))
+            data = data[data['Step'] < epochs_monitored]
+            
+            # Extract Step and Value columns
+            steps = data['Step'] + 1  # Epoch - 1
+            if metric == 'Akurasi':
+                values = data['Value'] * 100  # Metric to plot
+            else:
+                values = data['Value']
+            
+            # If line_colors is provided, use it, otherwise use default color cycle
+            if line_colors and i < len(line_colors):
+                plt.plot(steps, values, label=label, color=line_colors[i])
+            else:
+                plt.plot(steps, values, label=label)
+    
+        # Customize the plot
+        plt.xlabel("Epoch")
+        ylim = math.ceil(max(values))
+        if metric == 'Akurasi':
+            metric = metric+' (%)'
+            y_interval = math.ceil(ylim/10)
+        if metric == 'Loss':
+            y_interval = math.ceil(ylim/10)
+        else:
+            y_interval = (ylim/10)
+        plt.ylabel(metric)
+        plt.title("")
+        # plt.gca().yaxis.set_major_locator(MultipleLocator(y_interval)) 
+        plt.gca().yaxis.set_major_locator(MultipleLocator(19)) 
+        plt.ylim(0, 100)
+        if show_legend:
+            plt.legend()  # Add a legend
+        else:
+            plt.grid(True)  # Optional: Add a grid
+        plt.tight_layout()
+    
+        # Show the plot
+        plt.show()
 
 
 def extract_metrics_from_logs(log_dir, loss_key='epoch_loss', 
@@ -181,13 +233,15 @@ def plot_confusion_matrix_per_class(conf_matrix, class_labels, class_index, rota
     plt.yticks([0, 1], [f'{class_labels[class_index]}', f'Not {class_labels[class_index]}'])
     plt.show()
     
-def plot_confusion_matrix(predictions, true_classes, class_labels, rotation=0):
+def plot_confusion_matrix(predictions, true_classes, class_labels, rotation=0,
+                          title='Confusion Matrix', xlabel='Label Terprediksi',
+                          ylabel='Label Sebenarnya'):
     # Buat confusion matrix
     predicted_classes = np.argmax(predictions, axis=1) # Mengambil kelas dengan probabilitas tertinggi
     conf_matrix = confusion_matrix(true_classes, predicted_classes)
     disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=class_labels)
     disp.plot(cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix')
+    plt.title(title)
     plt.xticks(rotation=rotation)
     plt.show()
     return conf_matrix
