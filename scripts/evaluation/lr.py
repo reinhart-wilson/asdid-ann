@@ -1,70 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec  1 11:52:18 2024
-
-@author: rafae
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Nov 30 21:21:15 2024
 
 @author: rafae
 """
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 30 22:08:55 2024
+import sys, os
 
-@author: rafae
-"""
+working_dir = os.path.abspath(os.path.dirname(__file__))
+configs_dir = os.path.join(working_dir, '..', '..', 'config')
+src_dir = os.path.join(working_dir, '..', '..', 'src')
+sys.path.append(src_dir)
+sys.path.append(configs_dir)
 
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
+from utils import evaluation_utils as eutils
 
-# List of CSV file paths
-csv_files = ["file1.csv", "file2.csv", "file3.csv"]
-labels = ["Experiment 1", "Experiment 2", "Experiment 3"]  # Labels for each plot
+mpl.rcParams['figure.dpi'] = 300 # Set resolusi plot
 
-# Maximum step to include
-max_steps = 99
+monitored_param = '3.augment'
+tensorboard_data_path = f'../../tensorboard_data/{monitored_param}'
+csv_files = [
+    "cosdecay_validation.csv",
+    "augment_validation.csv" 
+             ]
+labels = ["Tanpa Augmentasi Data", 
+          "Dengan Augmentasi Data"]
 
-# Create subplots: 1 row, 3 columns
-fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)
-
-# Loop through each file and plot the data in individual subplots
-for i, (csv_file, label) in enumerate(zip(csv_files, labels)):
-    # Load CSV file
-    data = pd.read_csv(csv_file)
-    
-    # Extract Step and Value columns, filter by max_steps
-    filtered_data = data[data['Step'] <= max_steps]
-    steps = filtered_data['Step']
-    values = filtered_data['Value']
-    
-    # Plot the data in the respective subplot
-    axes[i].plot(steps, values, label=label)
-    axes[i].set_title(label)  # Title for each subplot
-    axes[i].set_xlabel("Steps (Epoch - 1)")
-    axes[i].grid(True)
-
-# Set shared y-axis label
-fig.text(0.06, 0.5, "Value", va='center', rotation='vertical')
-
-# Add combined legend
-lines, labels = [], []
-for ax in axes:
-    ax_lines, ax_labels = ax.get_legend_handles_labels()
-    lines.extend(ax_lines)
-    labels.extend(ax_labels)
-fig.legend(lines, labels, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.02))
-
-# Adjust layout
-plt.tight_layout(rect=[0, 0, 1, 0.95])  # Leave space for the legend
-
-# Show the plot
-plt.show()
-
+eutils.show_tensorboard_plots(tensorboard_data_path, csv_files, labels, 200,
+                              show_legend=False, line_colors=['orange', 'seagreen'])
 
 
 
