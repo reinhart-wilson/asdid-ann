@@ -12,11 +12,13 @@ from dataprep.data_prep import DataPrep
 dp = DataPrep()
 
 # Lokasi data tambahan
-input_folder = "./dataset/additional_training_data"
-output_folder = "./dataset/prepped_additional_training_data"
+input_folder = "./dataset/additional_data_2"
+output_folder = "./dataset/prepped_additional_data_lagi"
 os.listdir(input_folder)
 for item in os.listdir(input_folder):
     item_path = os.path.join(input_folder, item)
+
+
 
     # Laksanakan penyiapan data jika item adalah sebuah folder
     if os.path.isdir(item_path):
@@ -27,3 +29,6 @@ for item in os.listdir(input_folder):
         dp.crop_images(output_class_folder, output_class_folder, 224)
     else:
         print(f"Skipping {item}, nota a folder")
+        
+dp.split_dataset(output_folder, output_folder+'_split', train_ratio=0.8, 
+                 val_ratio=0.1)

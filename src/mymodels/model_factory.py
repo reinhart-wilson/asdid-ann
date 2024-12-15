@@ -27,9 +27,9 @@ def create_model(input_shape, num_classes, model_config_dict):
                            alpha = model_config_dict['alpha'],
                            dense_neuron_num= model_config_dict['dense'])
     elif model_name == 'originalnasnetmobile':
-        return MySqueezeNet(input_shape, num_classes)
-    elif model_name == 'originalsqueezenet':
         return OriginalNasNetMobile(input_shape, num_classes)
+    elif model_name == 'originalsqueezenet':
+        return MySqueezeNet(input_shape, num_classes)
     elif model_name == 'mobilenetv2':
         weights = model_config_dict.get('weights', None)  # Default is None
         dropout = model_config_dict.get('dropout', 0.0)  # Default dropout rate is 0.0

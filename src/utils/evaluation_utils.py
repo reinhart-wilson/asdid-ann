@@ -5,42 +5,143 @@ import os
 import pandas as pd
 import pickle
 import tensorflow as tf
+import time
+from PIL import Image
 from matplotlib.ticker import MultipleLocator
 from tensorflow.python.summary.summary_iterator import summary_iterator
 from sklearn.metrics import  ConfusionMatrixDisplay, confusion_matrix
 
+def load_image(image_path, target_size=(224, 224)):
+    """
+    Memuat dan melakukan praproses pada citra
+
+    Parameters
+    ----------
+    image_path : str
+        Path ke file citra
+    target_size : tuple, optional
+        Ukuran target. Nilai default adalah (224, 224).
+
+    Returns
+    -------
+    image_array : np.array
+        Data yang sudah diproses, dalam bentuk array.
+
+    """
+    image = Image.open(image_path).convert('RGB')
+    image = image.resize(target_size)
+    image_array = np.array(image) / 255.0  # Normalize to [0, 1]
+    image_array = np.expand_dims(image_array, axis=0).astype(np.float32)
+    return image_array
+
+
+def get_inference_time(interpreter, input_data):
+    """
+    Menjalankan inferensi data masukan menggunakan model tensorflow lite untuk
+    mengukur waktu yang diperlukan
+    
+    Parameters
+    ----------
+    interpreter: tf.lite.Interpreter
+        TFLite model interpreter.
+    input_data: np.array
+        Data citra input yang sudah dipraproses
+        
+    Returns
+    ----------
+    float
+        Waktu inferensi dalam milidetik
+    """
+    input_index = interpreter.get_input_details()[0]['index']
+    interpreter.set_tensor(input_index, input_data)
+
+    start_time = time.time()  
+    interpreter.invoke()      
+    end_time = time.time()   
+    
+    return end_time - start_time
+
 def load_history(file_path):
+    """
+    Memuat riwayat pelatihan (history) model dari file yang disimpan menggunakan 
+    pickle. 
+
+    Parameters
+    ----------
+    file_path : str
+        Path lengkap ke file yang berisi objek riwayat model yang telah disimpan 
+        dengan format pickle.
+
+    Returns
+    -------
+    history : dict
+        Objek yang berisi riwayat pelatihan model, biasanya berupa dictionary dengan metrik-metrik
+        yang dicatat selama pelatihan, seperti `loss`, `accuracy`, dll.
+
+    """
     with open(file_path,'rb') as file:
         history = pickle.load(file)
     return history
 
 def show_tensorboard_plots(tensorboard_data_path, csv_files, labels, 
                            epochs_monitored, show_legend=False, line_colors=None):
+    """
+    Menampilkan grafik metrik (Akurasi, Loss, Recall) dari data TensorBoard yang 
+    disimpan dalam file CSV. Fungsi ini membaca data dari file CSV yang berisi 
+    metrik pelatihan dan menghasilkan grafik untuk beberapa metrik utama seperti 
+    akurasi, loss, dan recall. Grafik ini akan menampilkan perubahan metrik tersebut 
+    seiring berjalannya epoch selama pelatihan. File CSV didapatkan dengan cara 
+    mengunduh dari TensorBoard.
+
+    Parameters
+    ----------
+    tensorboard_data_path : str
+        Path ke direktori yang berisi subdirektori untuk setiap metrik (Akurasi, 
+        Loss, Recall) yang berisi file CSV.
+    
+    csv_files : list of str
+        Daftar nama file CSV yang berisi data metrik dari TensorBoard untuk setiap 
+        eksperimen.
+    
+    labels : list of str
+        Daftar label yang digunakan untuk menandai setiap plot (misalnya, nama 
+        eksperimen atau model).
+    
+    epochs_monitored : int
+        Jumlah epoch yang akan dipantau dan diplotkan pada grafik.
+    
+    show_legend : bool, optional
+        Jika True, akan menampilkan legenda pada grafik. Default adalah False.
+    
+    line_colors : list of str, optional
+        Daftar warna yang digunakan untuk setiap garis pada grafik. Jika None, 
+        warna default akan digunakan.
+
+    Returns
+    -------
+    None
+        Fungsi ini hanya menampilkan grafik tanpa mengembalikan nilai.
+    """
     metrics = ['Akurasi', 'Loss', 'Recall']
     
     for metric in metrics:
         data_path = os.path.join(tensorboard_data_path, metric)
         
-        # Loop through each file and plot the data
         for i, (csv_file, label) in enumerate(zip(csv_files, labels)):
-            # Load CSV file
             data = pd.read_csv(os.path.join(data_path, csv_file))
             data = data[data['Step'] < epochs_monitored]
             
-            # Extract Step and Value columns
             steps = data['Step'] + 1  # Epoch - 1
             if metric == 'Akurasi':
                 values = data['Value'] * 100  # Metric to plot
             else:
                 values = data['Value']
             
-            # If line_colors is provided, use it, otherwise use default color cycle
             if line_colors and i < len(line_colors):
                 plt.plot(steps, values, label=label, color=line_colors[i])
             else:
                 plt.plot(steps, values, label=label)
     
-        # Customize the plot
         plt.xlabel("Epoch")
         ylim = math.ceil(max(values))
         if metric == 'Akurasi':
@@ -52,7 +153,6 @@ def show_tensorboard_plots(tensorboard_data_path, csv_files, labels,
             y_interval = (ylim/10)
         plt.ylabel(metric)
         plt.title("")
-        # plt.gca().yaxis.set_major_locator(MultipleLocator(y_interval)) 
         plt.gca().yaxis.set_major_locator(MultipleLocator(19)) 
         plt.ylim(0, 100)
         if show_legend:
@@ -61,7 +161,6 @@ def show_tensorboard_plots(tensorboard_data_path, csv_files, labels,
             plt.grid(True)  # Optional: Add a grid
         plt.tight_layout()
     
-        # Show the plot
         plt.show()
 
 
@@ -69,17 +168,37 @@ def extract_metrics_from_logs(log_dir, loss_key='epoch_loss',
                               acc_key='epoch_accuracy', 
                               recall_key='epoch_recall'):
     """
-    Extracts the lowest loss, highest accuracy, and highest recall from TensorBoard logs.
+    Fungsi ini memindai seluruh file log yang ada di dalam direktori `log_dir` 
+    dan mengekstrak nilai metrik tertentu, seperti loss, akurasi, dan recall, 
+    dari setiap file log. Nilai metrik yang diekstrak adalah nilai terbaik. 
     
-    Args:
-        log_dir (str): Directory containing TensorBoard log files.
-        loss_key (str): Key for loss metric in TensorBoard logs.
-        acc_key (str): Key for accuracy metric in TensorBoard logs.
-        recall_key (str): Key for recall metric in TensorBoard logs.
-    
-    Returns:
-        dict: A dictionary with the lowest loss, highest accuracy, and highest recall.
+    Parameters
+    ----------
+    log_dir : str
+        Path ke direktori yang berisi file log yang dihasilkan oleh TensorBoard. 
+        
+    loss_key : str, optional
+        Nama tag yang digunakan untuk menandai nilai loss dalam log. Default 
+        adalah 'epoch_loss'.
+
+    acc_key : str, optional
+        Nama tag yang digunakan untuk menandai nilai akurasi dalam log. Default 
+        adalah 'epoch_accuracy'.
+
+    recall_key : str, optional
+        Nama tag yang digunakan untuk menandai nilai recall dalam log. Default 
+        adalah 'epoch_recall'.
+
+    Returns
+    -------
+    dict
+        Dictionary yang berisi nilai terbaik untuk loss, akurasi, dan recall yang 
+        ditemukan dalam log.Keys yang ada dalam dictionary adalah:
+        - 'lowest_loss': Loss terendah yang ditemukan.
+        - 'highest_accuracy': Akurasi tertinggi yang ditemukan.
+        - 'highest_recall': Recall tertinggi yang ditemukan.
     """
+
     lowest_loss = float('inf')
     highest_accuracy = float('-inf')
     highest_recall = float('-inf')
@@ -174,47 +293,59 @@ def get_flops(model, model_inputs) -> float:
     )
     tf.compat.v1.reset_default_graph()
     
-    return (flops.total_float_ops)
+    return (flops.total_float_ops)/2
 
-# def plot_confusion_matrix(model, test_generator, class_labels, text_rotation=45):
-#     """
-#     Fungsi untuk memplot confusion matrix dari model TensorFlow dengan opsi mengatur kemiringan teks sumbu x.
+def plot_confusion_matrix(predictions, true_classes, class_labels, rotation=0,
+                          title='Confusion Matrix', xlabel='Label Terprediksi',
+                          ylabel='Label Sebenarnya'):
+    """
+    Membuat dan menampilkan matriks kebingunguan (confusion matrix) berdasarkan 
+    prediksi model dan kelas sebenarnya. Plot digambar dengan `matplotlib`.
     
-#     Parameters:
-#     model : TensorFlow model
-#         Model TensorFlow yang telah dilatih.
-#     test_generator : DirectoryIterator
-#         Generator untuk data uji.
-#     class_labels : list
-#         Daftar label kelas.
-#     text_rotation : int, optional (default=45)
-#         Derajat kemiringan teks pada sumbu x.
-#     """
-#     # Membuat prediksi
-#     predictions = model.predict(test_generator)
-#     predicted_classes = np.argmax(predictions, axis=1)  # Mengambil kelas dengan probabilitas tertinggi
-#     true_classes = test_generator.classes
+    Parameters
+    ----------
+    predictions : array-like, shape (n_samples, n_classes)
+        Matriks prediksi dari model, dimana setiap elemen adalah probabilitas 
+        atau skor untuk setiap kelas. Fungsi ini akan memilih kelas dengan 
+        probabilitas tertinggi sebagai prediksi akhir.
 
-#     # Membuat confusion matrix
-#     conf_matrix = confusion_matrix(true_classes, predicted_classes)
+    true_classes : array-like, shape (n_samples,)
+        Array berisi kelas sebenarnya (label yang benar) dari data.
 
-#     # Plot confusion matrix untuk setiap kelas
-#     for i in range(len(class_labels)):
-#         TP = conf_matrix[i, i]
-#         FP = conf_matrix[:, i].sum() - TP
-#         FN = conf_matrix[i, :].sum() - TP
-#         TN = conf_matrix.sum() - (FP + FN + TP)
+    class_labels : list of str
+        Daftar label kelas yang digunakan untuk memberi nama pada sumbu x dan y 
+        dari matriks kebingunguan.
 
-#         matrix = np.array([[TP, FP], [FN, TN]])
-        
-#         disp = ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["Positive", "Negative"])
-#         disp.plot(cmap=plt.cm.Blues, values_format='d')
-#         plt.title(f'Confusion Matrix for {class_labels[i]}')
-#         plt.xlabel('Predicted')
-#         plt.ylabel('Actual')
-#         plt.xticks([0, 1], [f'{class_labels[i]}', f'Not {class_labels[i]}'], rotation=text_rotation)
-#         plt.yticks([0, 1], [f'{class_labels[i]}', f'Not {class_labels[i]}'])
-#         plt.show()
+    rotation : int, opsional
+        Sudut rotasi label pada sumbu x (label kelas terprediksi). Default adalah 
+        0 derajat.
+
+    title : str, opsional
+        Judul grafik. Default adalah 'Confusion Matrix'.
+
+    xlabel : str, opsional
+        Label untuk sumbu x (kelas yang diprediksi). Default adalah 'Label Terprediksi'.
+
+    ylabel : str, opsional
+        Label untuk sumbu y (kelas sebenarnya). Default adalah 'Label Sebenarnya'.
+
+    Returns
+    -------
+    conf_matrix : ndarray, shape (n_classes, n_classes)
+        Matriks kebingunguan yang dihitung berdasarkan `predictions` dan `true_classes`.
+        Matriks ini menggambarkan seberapa banyak prediksi yang benar dan salah 
+        pada setiap kelas.
+    """
+    # Buat confusion matrix
+    predicted_classes = np.argmax(predictions, axis=1) # Mengambil kelas dengan probabilitas tertinggi
+    conf_matrix = confusion_matrix(true_classes, predicted_classes)
+    disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=class_labels)
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title(title)
+    plt.xticks(rotation=rotation)
+    plt.show()
+    return conf_matrix
+
 
 def plot_confusion_matrix_per_class(conf_matrix, class_labels, class_index, rotation=0):
     TP = conf_matrix[class_index, class_index]
@@ -233,19 +364,6 @@ def plot_confusion_matrix_per_class(conf_matrix, class_labels, class_index, rota
     plt.yticks([0, 1], [f'{class_labels[class_index]}', f'Not {class_labels[class_index]}'])
     plt.show()
     
-def plot_confusion_matrix(predictions, true_classes, class_labels, rotation=0,
-                          title='Confusion Matrix', xlabel='Label Terprediksi',
-                          ylabel='Label Sebenarnya'):
-    # Buat confusion matrix
-    predicted_classes = np.argmax(predictions, axis=1) # Mengambil kelas dengan probabilitas tertinggi
-    conf_matrix = confusion_matrix(true_classes, predicted_classes)
-    disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=class_labels)
-    disp.plot(cmap=plt.cm.Blues)
-    plt.title(title)
-    plt.xticks(rotation=rotation)
-    plt.show()
-    return conf_matrix
-
 
 def plot_loss(history, title=None):
     # Plot training loss vs. validation loss
@@ -305,4 +423,44 @@ def print_parameters(use_gpu, batch_size, image_size, epochs,
     print(f"{'epochs':<15} {epochs}")
     print(f"{'seed':<15} {seed}")
     print(f"{'alpha':<15} {alpha:.4f}")
+
+
+# def plot_confusion_matrix(model, test_generator, class_labels, text_rotation=45):
+#     """
+#     Fungsi untuk memplot confusion matrix dari model TensorFlow dengan opsi mengatur kemiringan teks sumbu x.
+    
+#     Parameters:
+#     model : TensorFlow model
+#         Model TensorFlow yang telah dilatih.
+#     test_generator : DirectoryIterator
+#         Generator untuk data uji.
+#     class_labels : list
+#         Daftar label kelas.
+#     text_rotation : int, optional (default=45)
+#         Derajat kemiringan teks pada sumbu x.
+#     """
+#     # Membuat prediksi
+#     predictions = model.predict(test_generator)
+#     predicted_classes = np.argmax(predictions, axis=1)  # Mengambil kelas dengan probabilitas tertinggi
+#     true_classes = test_generator.classes
+
+#     # Membuat confusion matrix
+#     conf_matrix = confusion_matrix(true_classes, predicted_classes)
+
+#     # Plot confusion matrix untuk setiap kelas
+#     for i in range(len(class_labels)):
+#         TP = conf_matrix[i, i]
+#         FP = conf_matrix[:, i].sum() - TP
+#         FN = conf_matrix[i, :].sum() - TP
+#         TN = conf_matrix.sum() - (FP + FN + TP)
+
+#         matrix = np.array([[TP, FP], [FN, TN]])
         
+#         disp = ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["Positive", "Negative"])
+#         disp.plot(cmap=plt.cm.Blues, values_format='d')
+#         plt.title(f'Confusion Matrix for {class_labels[i]}')
+#         plt.xlabel('Predicted')
+#         plt.ylabel('Actual')
+#         plt.xticks([0, 1], [f'{class_labels[i]}', f'Not {class_labels[i]}'], rotation=text_rotation)
+#         plt.yticks([0, 1], [f'{class_labels[i]}', f'Not {class_labels[i]}'])
+#         plt.show()

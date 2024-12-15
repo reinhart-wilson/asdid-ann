@@ -10,7 +10,18 @@ from keras import models
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 
+
 class AbstractCNN(ABC):
+    """
+    Kelas abstrak untuk membangun, melatih, dan mengevaluasi model Convolutional 
+    Neural Network (CNN) menggunakan Keras.
+
+    Kelas ini menyediakan antarmuka dasar untuk membangun model CNN dan memungkinkan 
+    pengguna untuk menambahkan layer, mengompilasi, melatih, mengevaluasi, dan 
+    menyimpan model. Kelas ini bertindak sebagai template, dengan metode abstrak
+    untuk membangun model yang perlu diimplementasikan oleh subclass.
+    """
+
     def __init__(self, input_shape, num_classes):
         self.input_shape = input_shape
         self.num_classes = num_classes

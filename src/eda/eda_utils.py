@@ -16,18 +16,35 @@ mpl.rcParams['figure.dpi'] = 150 # Set resolusi plot
 
 def get_image_resolution(image_path):
     """
-    Fungsi untuk mengambil dan mengembalikan ukuran gambar.
+    Mengambil dan mengembalikan ukuran gambar.
     
-    Parameters:
-    - image_path (str): Path penyimpanan gambar.
+    Parameters
+    ----------
+    image_path : str
+        Path ke file gambar.
     
-    Returns:
-    tuple: Tuple berisi resolusi gambar dengan urutan height lalu width.
+    Returns
+    -------
+    tuple
+        Resolusi gambar dalam bentuk (lebar, tinggi).
     """
     with Image.open(image_path) as img:
         return img.size
     
 def get_set_resolutions(dataset_path):
+    """
+    Mengambil resolusi semua gambar dalam folder dataset.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Jalur ke folder dataset.
+
+    Returns
+    -------
+    list
+        Daftar resolusi gambar dalam format (lebar, tinggi).
+    """
     resolutions = []
     for class_folder in os.listdir(dataset_path):
         class_path = os.path.join(dataset_path, class_folder)
@@ -39,12 +56,18 @@ def get_set_resolutions(dataset_path):
 
 def eda_scatter_plot(dataset_path):
     """
-    Fungsi untuk membuat scatter plot resolusi gambar dalam set data.
-    
-    Parameters:
-    - dataset_path (str): Path folder set data.
-    """
-    
+    Membuat scatter plot resolusi gambar dalam dataset.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Path ke folder dataset.
+
+    Returns
+    -------
+    None
+        Scatter plot ditampilkan menggunakan Matplotlib.
+    """    
     resolutions = get_set_resolutions(dataset_path)
 
     resolutions = list(set(resolutions))  # Menghilangkan resolusi duplikat
@@ -58,21 +81,34 @@ def eda_scatter_plot(dataset_path):
 
 def count_classes(dataset_path):
     """
-    Fungsi untuk menghitung banyak kelas dengan melihat banyak folder dalam path
-    yang ditentukan.
-    
-    Parameters:
-    - dataset_path (str): Path folder set data.
+    Menghitung jumlah kelas dalam dataset berdasarkan jumlah sub-folder.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Jalur ke folder dataset.
+
+    Returns
+    -------
+    tuple
+        Jumlah kelas dan daftar nama kelas.
     """
     classes = [class_folder for class_folder in os.listdir(dataset_path) if os.path.isdir(os.path.join(dataset_path, class_folder))]
     return len(classes), classes
 
 def count_data_per_class(dataset_path):
     """
-    Fungsi untuk membuat scatter plot resolusi gambar dalam set data.
-    
-    Parameters:
-    - dataset_path (str): Path folder set data.
+    Menghitung jumlah data per kelas dalam dataset.
+
+    Parameters
+    ----------
+    dataset_path : str
+        Jalur ke folder dataset.
+
+    Returns
+    -------
+    dict
+        Dictionary berisi jumlah data untuk setiap kelas.
     """
     class_counts = {}
     for class_folder in os.listdir(dataset_path):
@@ -83,15 +119,21 @@ def count_data_per_class(dataset_path):
 
 def visualize_class_counts(class_counts, plot_size=None, show_label=False):
     """
-    Menampilkan visualisasi bar chart dari banyaknya data per kelas.
+    Menampilkan visualisasi bar chart jumlah data per kelas.
 
-    Parameters:
-    - class_counts (dict): Dictionary berisi banyaknya data per kelas.
-    - plot_size (tuple, optional): Ukuran plot sebagai tuple (lebar, tinggi).
-    - show_label (bool, optional): Menentukan apakah menampilkan nilai di atas bar.
+    Parameters
+    ----------
+    class_counts : dict
+        Dictionary berisi jumlah data untuk setiap kelas.
+    plot_size : tuple, optional
+        Ukuran plot dalam format (lebar, tinggi).
+    show_label : bool, optional
+        Jika True, menampilkan nilai di atas setiap bar.
 
-    Returns:
+    Returns
+    -------
     None
+        Bar chart ditampilkan menggunakan Matplotlib.
     """
     if plot_size:
         plt.figure(figsize=plot_size)
@@ -113,19 +155,36 @@ def visualize_class_counts(class_counts, plot_size=None, show_label=False):
     
 def calculate_total_data(class_counts):
     """
-    Menghitung total anggota dari semua kelas.
+    Menghitung total jumlah data dari semua kelas.
 
-    Parameters:
-    - class_counts (dict): Dictionary berisi banyaknya data per kelas.
+    Parameters
+    ----------
+    class_counts : dict
+        Dictionary berisi jumlah data untuk setiap kelas.
 
-    Returns:
-    int: Total anggota dari semua kelas.
+    Returns
+    -------
+    int
+        Total jumlah data dari semua kelas.
     """
     total_data = sum(class_counts.values())
     return total_data
 
-
 def check_channels_used(dataset_path):
+    """
+    Memeriksa kanal warna yang digunakan dalam semua gambar di dalam set data.
+
+    Parameters
+    ----------
+    dataset_path : str
+        ath ke folder dataset.
+
+    Returns
+    -------
+    channels_used : set
+        Kanal warna yang ditemukan dalam dataset.
+
+    """
     channels_used = set()
     for class_folder in os.listdir(dataset_path):
         class_path = os.path.join(dataset_path, class_folder)
@@ -134,26 +193,21 @@ def check_channels_used(dataset_path):
             with Image.open(image_path) as img:
                 channels_used.update(img.getbands())
     return channels_used
-
-def show_sample_images(dataset_path, num_samples=3):
-    plt.figure(figsize=(12, 8))
-    gs = gridspec.GridSpec(len(os.listdir(dataset_path)), num_samples)
-
-    for i, class_folder in enumerate(os.listdir(dataset_path)):
-        class_path = os.path.join(dataset_path, class_folder)
-        if os.path.isdir(class_path):
-            sample_images = os.listdir(class_path)[:num_samples]
-            for j, image_name in enumerate(sample_images):
-                image_path = os.path.join(class_path, image_name)
-                img = Image.open(image_path)
-                plt.subplot(gs[i, j])
-                plt.imshow(img)
-                plt.axis('off')
-                plt.title(f'Class: {class_folder}')                
-    plt.show()
     
 def plot_resolution_heatmap(resolutions):
-    # Membuat histogram
+    """
+    Membuat heatmap untuk memperlihatkan persebaran resolusi gambar dalam dataset.
+
+    Parameters
+    ----------
+    resolutions : list
+        List resolusi gambar. Format sama dengan keluaran fungsi get_set_resolutions
+
+    Returns
+    -------
+    None.
+
+    """
     plt.figure(figsize=(10, 6))
     plt.hist2d(*zip(*resolutions), bins=(50, 50), cmap='viridis')
     plt.title('Persebaran Ukuran Gambar')
@@ -163,13 +217,22 @@ def plot_resolution_heatmap(resolutions):
     plt.show()
     
 def create_overall_size_histogram(data_directory):
-    # Inisialisasi list untuk menyimpan ukuran file dari seluruh dataset
-    all_sizes = []
+    """
+    Membuat histogram untuk memperlihatkan distribusi ukuran file gambar dalam 
+    dataset.
 
-    # Mendapatkan daftar kelas (sub-direktori) dalam direktori data
+    Parameters
+    ----------
+    data_directory : str
+        Path ke direktori dataset.
+
+    Returns
+    -------
+    None.
+    """
+    all_sizes = []
     classes = os.listdir(data_directory)
 
-    # Iterasi melalui setiap kelas
     for class_name in classes:
         class_path = os.path.join(data_directory, class_name)
 
@@ -181,7 +244,6 @@ def create_overall_size_histogram(data_directory):
 
                 # Memastikan bahwa yang diakses adalah file
                 if os.path.isfile(file_path):
-                    # Mendapatkan ukuran file dalam kilobytes dan menambahkannya ke list
                     file_size_kb = os.path.getsize(file_path) / 1024
                     all_sizes.append(file_size_kb)
 
@@ -196,25 +258,34 @@ def create_overall_size_histogram(data_directory):
     
 def create_class_samples(num_samples = 2, data_dir="./data", 
                          output_dir='./output', seed=None):
-    # Membuat direktori output jika belum ada
+    """
+    Membuat kolase gambar sampel dari setiap kelas dalam dataset.
+    
+    Parameters
+    ----------
+    num_samples : int, opsional
+        Jumlah gambar sampel per kelas. Default adalah 2.
+    data_dir : str, optional
+        Path direktori dataset. Default adalah './data'.
+    output_dir : str, optional
+        Path direktori output untuk menyimpan kolase. Default adalah './output'.
+    seed : int, optional 
+        Seed untuk memastikan randomisasi yang konsisten. Default adalah None.
+    
+    Returns
+    ----------
+    None.
+    """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Mengatur seed untuk random jika diberikan
     if seed is not None:
         random.seed(seed)
 
-    # Iterasi melalui setiap kelas
     for class_name in os.listdir(data_dir):
         class_path = os.path.join(data_dir, class_name)
-
-        # Mengambil daftar file gambar dalam kelas
         image_files = [file for file in os.listdir(class_path) if file.lower().endswith(('.png', '.jpg', '.jpeg'))]
-
-        # Mengambil sampel acak dari kelas
         random_samples = random.sample(image_files, min(num_samples, len(image_files)))
-
-        # Menggabungkan sampel gambar menjadi satu gambar
         combined_image = Image.new("RGB", (400 * num_samples, 300), (255, 255, 255))  # Latar belakang putih
 
         for i, sample_file in enumerate(random_samples):
@@ -232,12 +303,28 @@ def create_class_samples(num_samples = 2, data_dir="./data",
             position = (400 * i, 0)
             combined_image.paste(sample_image, position)
 
-        # Menyimpan gambar gabungan ke direktori output
         output_path = os.path.join(output_dir, f"{class_name}_sample_collage.jpg")
         combined_image.save(output_path)
 
-        # Menampilkan gambar gabungan menggunakan Matplotlib
         plt.imshow(combined_image)
         plt.title(f"Class: {class_name}")
         plt.axis("off")
         plt.show()
+
+
+def show_sample_images(dataset_path, num_samples=3):
+    plt.figure(figsize=(12, 8))
+    gs = gridspec.GridSpec(len(os.listdir(dataset_path)), num_samples)
+
+    for i, class_folder in enumerate(os.listdir(dataset_path)):
+        class_path = os.path.join(dataset_path, class_folder)
+        if os.path.isdir(class_path):
+            sample_images = os.listdir(class_path)[:num_samples]
+            for j, image_name in enumerate(sample_images):
+                image_path = os.path.join(class_path, image_name)
+                img = Image.open(image_path)
+                plt.subplot(gs[i, j])
+                plt.imshow(img)
+                plt.axis('off')
+                plt.title(f'Class: {class_folder}')                
+    plt.show()

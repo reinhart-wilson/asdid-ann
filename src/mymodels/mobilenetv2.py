@@ -11,6 +11,43 @@ from keras.regularizers import l2
 from .abstract_cnn import AbstractCNN
 from .custom_gradient_accumulation import CustomGradientAccumulation as CustomGA
 
+class OriginalMobileNetV2(AbstractCNN):
+    
+    def __init__(self, input_shape, num_classes, alpha=1.0):  # Added weight_decay parameter
+        super(OriginalMobileNetV2, self).__init__(input_shape, num_classes)
+        self.alpha = alpha
+
+    def build_model(self, include_classification_head = True, weights=None):
+        # Arsitektur MobileNet dari Keras sebagai base model (feature extractor)
+        if weights not in [None, 'imagenet']:
+            raise ValueError("Weights not recognized.")
+            
+        base_model = MobileNetV2(include_top=False,
+                                  weights=weights, 
+                                  input_shape=self.input_shape, 
+                                  alpha=self.alpha)
+        
+        # Base model output
+        x = base_model.output
+        
+        # Tambahkan head klasifikasi jika diinginkan
+        if include_classification_head:
+            # Classification head
+            x = layers.GlobalAveragePooling2D()(x)
+            x = layers.Dense(self.num_classes, activation='softmax')(x)
+            self.classification_head = None
+        else:
+            self.classification_head = [
+                layers.GlobalAveragePooling2D(),
+                layers.Dense(self.num_classes, activation='softmax')
+                ]
+
+        # Create the model
+        self.model = models.Model(inputs=base_model.input, outputs=x)
+        
+    def get_classification_head(self):
+        return self.classification_head
+
 class MyMobileNetV2(AbstractCNN):
     def __init__(self, input_shape, num_classes, alpha=1.0, 
                  dense_neuron_num=1024, dropout=0, weights=None,
@@ -52,29 +89,3 @@ class MyMobileNetV2(AbstractCNN):
             self.model = models.Model(inputs=base_model.input, outputs=predictions)
         # self.model.summary()  # Print model summary for verification
 
-class OriginalMobileNetV2(AbstractCNN):
-    
-    def __init__(self, input_shape, num_classes, alpha=1.0, 
-                 dense_neuron_num=1024, dropout=0, weights=None,
-                 weight_decay=0):  # Added weight_decay parameter
-        super(OriginalMobileNetV2, self).__init__(input_shape, num_classes)
-        self.dense_neuron_num = dense_neuron_num
-        self.alpha = alpha
-        if weights not in [None, 'imagenet']:
-            raise ValueError("Weights not recognized.")
-        self.weights = weights  # Store the weight decay parameter
-
-    def build_model(self):
-        # Arsitektur MobileNet dari Keras sebagai base model (feature extractor)
-        base_model = MobileNetV2(include_top=False,
-                                  weights=None, 
-                                  input_shape=self.input_shape, 
-                                  alpha=self.alpha)
-        
-        # Classification head
-        x = base_model.output
-        x = layers.GlobalAveragePooling2D()(x)
-        predictions = layers.Dense(self.num_classes, activation='softmax')(x)
-
-        # Create the model
-        self.model = models.Model(inputs=base_model.input, outputs=predictions)

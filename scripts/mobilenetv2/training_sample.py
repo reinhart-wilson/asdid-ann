@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec  3 09:10:18 2024
+Created on Sun Dec 15 02:02:30 2024
 
 @author: reinh
 """
@@ -15,28 +15,28 @@ sys.path.append(configs_dir)
 
 # Set mixed precision
 from utils import general_utils as gutils
+gutils.use_gpu(True)
 gutils.use_mixed_precision()
 
 from callbacks.save_latest_model import SaveLatestModel
 from callbacks.learning_rate_logger import LearningRateLogger
 from configs.other_configs import data_info as dinfo
-from mymodels.squeezenet import MySqueezeNet
+from mymodels.mobilenetv2 import OriginalMobileNetV2
 from tensorflow.keras import optimizers, metrics, callbacks, layers, regularizers 
 from utils import training_utils as tutils
 
 # Params
-mode        = 1 # 0 cont 1 train
-last_epoch  = 3
+mode        = 1 # 0 lanjutkan training, 1 training dari awal
+last_epoch  = 171
 epoch       = 100
-batch_size  = 96
+batch_size  = 12
+n_gradients = 0
 dense       = 512*1 
 dropout     = 0
-weights     = None
+weights     = 'imagenet'
 wdecay      = 4e-5
 alpha       = 1.0 # Bukan learning rate
 augment     = True
-optimizer_name = 'adam'
-momentum    = None
 lr_config   = {
     'init_value' : 1e-4,
     'scheduler_config' : {
@@ -47,17 +47,18 @@ lr_config   = {
 }
 
 # Paths
-PARAM_VAL               = 2
-TUNED_PARAM             = 'final+mobilenetv2top'
-SAVE_PATH               = f'../../training_result/shufflenet/{TUNED_PARAM}/{PARAM_VAL}'
+PARAM_VAL               = 'imagenet'
+TUNED_PARAM             = 'transfer_learning'
+SAVE_PATH               = f'../../training_result/mobilenetv2/{TUNED_PARAM}/{PARAM_VAL}'
+DATA_PATH               = dinfo.EXTENDED_DATA_PATH
 BEST_MODEL_FILENAME     = 'best_model_epoch.tf'
 LAST_MODEL_FILENAME     = 'model_at_{epoch}.tf'
 LATEST_MODEL_FILENAME   = 'latest_model.tf'
 LOGDIR                  = os.path.join(SAVE_PATH, "logs")
 
 # Load data
-train_data_dir = os.path.join(dinfo.EXTENDED_DATA_PATH, 'train')
-val_data_dir = os.path.join(dinfo.EXTENDED_DATA_PATH, 'validation')
+train_data_dir = os.path.join(DATA_PATH, 'train')
+val_data_dir = os.path.join(DATA_PATH, 'validation')
 train_datagen = gutils.make_datagen(train_data_dir, 
                                     dinfo.IMG_RES, 
                                     batch_size,
@@ -81,20 +82,16 @@ model_callbacks = [
     LearningRateLogger()
 ]
 
-# Metrics
-model_metrics = [
-    'accuracy',
-    metrics.Recall(name='recall')    
-    ]
-
 # Definisi model
-model = MySqueezeNet(dinfo.IMG_DIM, dinfo.NUM_CLASSES)
+model = OriginalMobileNetV2(
+    dinfo.IMG_DIM, 
+    dinfo.NUM_CLASSES, 
+    alpha=alpha
+    )
+
 
 if mode == 1:
-    # Definisi model
-    model = MySqueezeNet(dinfo.IMG_DIM, dinfo.NUM_CLASSES)
-    model.build_model(include_classification_head=False, include_top=False,
-                      pooling=None, weights='imagenet')
+    model.build_model(include_classification_head=False, weights=weights)
     top_layers = [
         layers.GlobalAveragePooling2D(),
         layers.Dense(dense, activation=None),
@@ -103,7 +100,6 @@ if mode == 1:
         layers.Dense(dinfo.NUM_CLASSES, activation='softmax')
     ]
     model.add_layers(top_layers)
-    
     
     # Learning Rate
     if 'scheduler_config' in lr_config:
@@ -123,7 +119,10 @@ if mode == 1:
     
     # Compile
     optimizer = optimizers.Adam(learning_rate=lr)
-
+    model_metrics = [
+        'accuracy',
+        metrics.Recall(name='recall')    
+        ]
     model.compile_model(optimizer=optimizer, metrics=model_metrics)
     
     # Train
@@ -134,44 +133,11 @@ if mode == 1:
                 callbacks=model_callbacks)
     model.save_model(os.path.join(SAVE_PATH, LAST_MODEL_FILENAME.format(epoch=epoch)))
 if mode == 0:
-    lr_scheduler_config = lr_config['scheduler_config']
-    
-    # Calculate total decay steps
-    total_decay_steps = tutils.compute_decay_steps(
-        train_datagen.samples,
-        batch_size,
-        lr_scheduler_config['epochs_to_decay']
-    )
-
-    
-    # Hitung langkah yang telah selesai
-    completed_steps = last_epoch * (train_datagen.samples // batch_size)
-
-    # Resume CosineDecay schedule
-    if lr_scheduler_config['name'] == 'cosine_decay':
-        LR_SCHEDULE_RESUME = optimizers.schedules.CosineDecay(
-            initial_learning_rate=lr_config['init_value'],
-            alpha=lr_scheduler_config['lr_alpha'],
-            decay_steps=total_decay_steps
-        )
-        # Ambil learning rate pada langkah terakhir
-        current_learning_rate = LR_SCHEDULE_RESUME(completed_steps)
-
-    # Definisi optimizer
-    if optimizer_name == 'sgd':
-        optimizer_resume = optimizers.SGD(learning_rate=current_learning_rate, momentum=momentum)
-    elif optimizer_name == 'adam':
-        optimizer_resume = optimizers.Adam(learning_rate=LR_SCHEDULE_RESUME)
-
-    # Load model terbaru dan lanjutkan pelatihan
     model.load_model(os.path.join(SAVE_PATH, LATEST_MODEL_FILENAME))
-    model.compile_model(optimizer=optimizer_resume, metrics=model_metrics)
-    model.train(
-        train_datagen,
-        val_datagen,
-        epochs=epoch,
-        batch_size=batch_size,
-        callbacks=model_callbacks,
-        initial_epoch=last_epoch
-    )
-
+    model.train(train_datagen,
+                val_datagen, 
+                epochs=epoch,
+                batch_size=batch_size,
+                callbacks=model_callbacks,
+                initial_epoch=last_epoch)
+    

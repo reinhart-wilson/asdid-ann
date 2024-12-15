@@ -7,7 +7,10 @@ sys.path.append(project_root)
 
 from src.utils import eda_utils
 
-dataset_path = '../dataset/prepped_data'
+dataset_path = '../dataset/additional_data_2'
+
+# Sampel data
+eda_utils.show_sample_images(dataset_path, num_samples=3)
 
 # Visualisasi persebaran data
 class_counts = eda_utils.count_data_per_class(dataset_path)
@@ -15,8 +18,8 @@ sorted_counts = eda_utils.sort_counts(class_counts)
 counts = list(sorted_counts.values())
 color = [
     'skyblue' if v >= 700 
-    else 'gold' if v >= 700 
-    else 'gold' for v in counts
+    else 'deepskyblue' if v >= 700 
+    else 'deepskyblue' for v in counts
     ]
 eda_utils.visualize_class_counts(sorted_counts, 
                                  plot_size=(8,6), 

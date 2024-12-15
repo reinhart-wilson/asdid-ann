@@ -1,8 +1,8 @@
-bacterial_blight
-cercospora_leaf_blight
-downey_mildew
-frogeye
-healthy
-potassium_deficiency
-soybean_rust
-target_spot
+Bacterial Blight
+Cercospora Leaf Blight
+Downey Mildew
+Frogeye
+Healthy
+Potassium Deficiency
+Soybean Rust
+Target Spot

@@ -12,36 +12,28 @@ from .abstract_cnn import AbstractCNN
 class AlexNet(AbstractCNN):
     def build_model(self):
         input_layer = Input(shape=self.input_shape)
-        
-        # 1st Convolutional Layer
+
         x = Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', activation='relu')(input_layer)
         x = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)  # Pooling size changed to 3x3
 
-        # 2nd Convolutional Layer
         x = Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', activation='relu')(x)  # Increased filters
         x = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)
 
-        # 3rd Convolutional Layer
         x = Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu')(x)
 
-        # 4th Convolutional Layer
         x = Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu')(x)
 
-        # 5th Convolutional Layer
         x = Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu')(x)
         x = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)  # Pooling after 5th conv layer
 
-        # Fully Connected Layers
         x = Flatten()(x)
         x = Dense(4096, activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(4096, activation='relu')(x)
         x = Dropout(0.5)(x)
 
-        # Output Layer
         output_layer = Dense(self.num_classes, activation='softmax')(x)
 
-        # Create the model
         self.model = Model(inputs=input_layer, outputs=output_layer)
 
 

@@ -19,20 +19,19 @@ from matplotlib.ticker import MultipleLocator
 
 mpl.rcParams['figure.dpi'] = 300 # Set resolusi plot
 
-monitored_param = '1.top'
-tensorboard_data_path = f'../../tensorboard_data/{monitored_param}/Recall'
-csv_files = ["dense 0_validation.csv", 
-             "dense 512_validation.csv", 
-             "dense 1024_validation.csv"]
-labels = ["Tanpa Tambahan Lapisan", 
-          "Dengan Tambahan Lapisan (Dense = 512)", 
-          "Dengan Tambahan Lapisan (Dense = 1024)"]
+monitored_param = '5.transfer'
+metric = 'Loss'
+tensorboard_data_path = f'../../tensorboard_data/{monitored_param}/{metric}'
+csv_files = ["tanpa transfer learning.csv", 
+             "dengan transfer learning.csv"]
+labels = ["Tanpa Transfer Learning", 
+          "Dengan Transfer Learning"]
 
 # Loop through each file and plot the data
 for csv_file, label in zip(csv_files, labels):
     # Load CSV file
     data = pd.read_csv(os.path.join(tensorboard_data_path, csv_file))
-    data = data[data['Step'] <= 99]
+    # data = data[data['Step'] <= 99]
     
     # Extract Step and Value columns
     steps = data['Step'] + 1  # Epoch - 1
@@ -40,14 +39,13 @@ for csv_file, label in zip(csv_files, labels):
     
     # Plot the data
     plt.plot(steps, values, label=label)
-plt.gca().yaxis.set_major_locator(MultipleLocator(0.1)) 
+# plt.gca().yaxis.set_major_locator(MultipleLocator(0.1)) 
 # Customize the plot
 plt.xlabel("Epoch")
-plt.ylabel("Recall")
+plt.ylabel(metric)
 plt.title("")
-plt.ylim(0, 0.95)
 plt.legend()  # Add a legend
-plt.grid(False)  # Optional: Add a grid
+# plt.grid(True)  # Optional: Add a grid
 plt.tight_layout()
 
 # Show the plot

@@ -9,7 +9,7 @@ Created on Sat Nov 23 19:38:21 2024
 from os import path
 
 SEED = 42
-CFG_NUM = 2
+CFG_NUM = 4
 USE_GPU= True
 DATA_PATH = "../dataset/split_prepped_data"
 

@@ -169,3 +169,4 @@ cython_debug/
 /scripts/training_result
 /tflite models
 /tflite models
+/inference_time_data

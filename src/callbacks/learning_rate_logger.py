@@ -10,6 +10,10 @@ from keras import backend, callbacks
 from tensorflow.keras import optimizers
 from tensorflow import summary
 
+"""
+Merupakan subkelas dari Callback keras untuk mencatat learning rate di setiap
+akhir epoch. Berguna untuk memantau learning rate ketika scheduler digunakan.
+"""
 class LearningRateLogger(callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}

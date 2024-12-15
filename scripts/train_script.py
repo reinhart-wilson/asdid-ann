@@ -21,7 +21,7 @@ sys.path.append(src_dir)
 sys.path.append(configs_dir)
 
 # Import file konfigurasi
-from configs.experiment_configs.exp1 import squeezenet_cfg as config
+from configs.experiment_configs.exp1 import nasnetmobile_cfg as config
 from configs.other_configs import data_location as dataloc
 
 # Set seed untuk beberapa library python agar hasil deterministik
@@ -36,7 +36,7 @@ import signal
 import pickle
 from mymodels.model_factory import create_model
 from keras.models import load_model
-from metrics.custom_metrics import WeightedRecall
+# from metrics.custom_metrics import WeightedRecall
 
 #temp
 from tensorflow.keras import optimizers

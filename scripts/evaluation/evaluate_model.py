@@ -24,12 +24,13 @@ from sklearn.metrics import classification_report
 highest_acc_epoch = 0
 highest_acc = 0
 
-model_path = '../../training_result/mobilenetv2/final/model_at_epoch160'
+model_path = '../../training_result/mobilenetv2/augment/True+adddata+1e-4+imagenet+epoch100/best_model_epoch.tf'
 model = MyMobileNetV2((0), 8)
 model.load_model(model_path)
 
 # Load data
-data_dir = '../../Dataset/split_prepped_additional_data_2_2/test'
+data_dir = '../../Dataset/split_prepped_data _with_added_data_all_class/test'
+data_dir = '../../Dataset/split_prepped_additional_data_2_2/validation'
 test_data = gutils.make_datagen(data_dir, (224,224), 8, shuffle=False, augment=False)
 
 # Evaluasi
@@ -52,35 +53,36 @@ report = classification_report(true_classes,
                                output_dict=False)
 print(report)
 
-# for i in range (150,201):
-#     model_path = f'../../training_result/mobilenetv2/final/model_at_epoch{i}'
-#     model = MyMobileNetV2((0), 8)
-#     model.load_model(model_path)
+
+    # Load data
+data_dir = '../../Dataset/split_prepped_additional_data_2_2/validation'
+test_data = gutils.make_datagen(data_dir, (224,224), 8, shuffle=False, augment=False)
+for i in range (150,201):
+    model_path = f'../../training_result/mobilenetv2/final/model_at_epoch{i}'
+    model = MyMobileNetV2((0), 8)
+    model.load_model(model_path)
+
     
-#     # Load data
-#     data_dir = '../../Dataset/split_prepped_additional_data_2_2/validation'
-#     test_data = gutils.make_datagen(data_dir, (224,224), 8, shuffle=False, augment=False)
+    # Evaluasi
+    model.evaluate(test_data)
     
-#     # Evaluasi
-#     model.evaluate(test_data)
+    # Lihat Heatmap Confusion Matrix
+    class_labels = list(test_data.class_indices.keys())
+    true_classes = test_data.classes
+    predictions = model.predict(test_data)
+    eutils.plot_confusion_matrix(predictions, 
+                                  true_classes, 
+                                  class_labels, 
+                                  rotation=90, 
+                                  title='Hasil Klasifikasi Model pada Set Data Validasi Tambahan')
     
-#     # Lihat Heatmap Confusion Matrix
-#     class_labels = list(test_data.class_indices.keys())
-#     true_classes = test_data.classes
-#     predictions = model.predict(test_data)
-#     eutils.plot_confusion_matrix(predictions, 
-#                                  true_classes, 
-#                                  class_labels, 
-#                                  rotation=90, 
-#                                  title='Hasil Klasifikasi Model pada Set Data Validasi Tambahan')
-    
-#     predicted_classes = np.argmax(predictions, axis=1)
-#     report = classification_report(true_classes, 
-#                                    predicted_classes, 
-#                                    target_names=class_labels,
-#                                    output_dict=True)
-#     if report['macro avg']['recall'] > highest_acc:
-#         highest_acc = report['macro avg']['recall'] 
-#         highest_acc_epoch = i
+    predicted_classes = np.argmax(predictions, axis=1)
+    report = classification_report(true_classes, 
+                                    predicted_classes, 
+                                    target_names=class_labels,
+                                    output_dict=True)
+    if report['macro avg']['recall'] > highest_acc:
+        highest_acc = report['macro avg']['recall'] 
+        highest_acc_epoch = i
         
-# print(i)
+print(highest_acc_epoch)

@@ -7,8 +7,24 @@ Created on Tue Sep 10 20:53:27 2024
 
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import EfficientNetV2B0  # Import EfficientNetV2
+from tensorflow.keras.applications import EfficientNetV2B0 
 from .abstract_cnn import AbstractCNN
+
+
+class EfficientNetV2(AbstractCNN):  
+    def __init__(self, input_shape, num_classes):
+        super(EfficientNetV2, self).__init__(input_shape, num_classes)
+
+    def build_model(self):
+        base_model = EfficientNetV2B0(weights=None, include_top=False, 
+                                      input_shape=(224, 224, 3))
+        
+
+        x = base_model.output
+        x = GlobalAveragePooling2D()(x) 
+        predictions = Dense(self.num_classes, activation='softmax')(x)
+        
+        self.model = Model(inputs=base_model.input, outputs=predictions)
 
 class MyEfficientNetV2(AbstractCNN):  # Renamed the class for clarity
     def __init__(self, input_shape, num_classes, alpha=1.0, 
@@ -29,24 +45,4 @@ class MyEfficientNetV2(AbstractCNN):  # Renamed the class for clarity
         predictions = Dense(self.num_classes, activation='softmax')(x)  # Add the final output layer
         
         # This is the model we will train from scratch
-        self.model = Model(inputs=base_model.input, outputs=predictions)
-
-class EfficientNetV2(AbstractCNN):  # Renamed the class for clarity
-    def __init__(self, input_shape, num_classes):
-        super(EfficientNetV2, self).__init__(input_shape, num_classes)
-
-    def build_model(self):
-        
-        # Build the EfficientNetV2 model without pre-trained weights
-        base_model = EfficientNetV2B0(weights=None, include_top=False, 
-                                      input_shape=(224, 224, 3))
-        
-        # Add Global Average Pooling (this is part of the original architecture)
-        x = base_model.output
-        x = GlobalAveragePooling2D()(x)  # Global average pooling
-        
-        # Add the final output layer (no additional dense layers, as per original architecture)
-        predictions = Dense(self.num_classes, activation='softmax')(x)
-        
-        # This is the model following the original architecture
         self.model = Model(inputs=base_model.input, outputs=predictions)
