@@ -1,1 +1,0 @@
-Kelihatannya downey mildew kurang bagus digeneralisasi karena pada set training, luka-lukanya sangat jarang (sparse)

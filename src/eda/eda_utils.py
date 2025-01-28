@@ -6,13 +6,65 @@ Created on Sat Dec 16 15:25:19 2023
 """
 
 import os
-from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib as mpl
+import numpy as np
 import random
+from PIL import Image, ImageOps
+from concurrent.futures import ThreadPoolExecutor
 
 mpl.rcParams['figure.dpi'] = 150 # Set resolusi plot
+
+def calculate_combined_histogram_rgb(dataset_path):
+    combined_histogram = {
+        "R": np.zeros(256),
+        "G": np.zeros(256),
+        "B": np.zeros(256),
+    }
+    image_count = 0
+    
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        for class_entry in os.scandir(dataset_path):
+            if class_entry.is_dir():
+                for image_entry in os.scandir(class_entry.path):
+                    if image_entry.name.endswith((".jpg", ".png")):
+                        futures.append(executor.submit(process_image_rgb, image_entry.path))
+                        image_count += 1
+        
+        for future in futures:
+            histograms = future.result()
+            combined_histogram["R"] += histograms["R"]
+            combined_histogram["G"] += histograms["G"]
+            combined_histogram["B"] += histograms["B"]
+    
+    # Normalisasi histogram gabungan
+    if image_count > 0:
+        for key in combined_histogram:
+            combined_histogram[key] /= image_count
+    return combined_histogram
+
+def process_image_rgb(image_path):
+    image = Image.open(image_path).convert("RGB")
+    r, g, b = image.split()
+    return {
+        "R": np.array(r.histogram()),
+        "G": np.array(g.histogram()),
+        "B": np.array(b.histogram()),
+    }
+
+def normalize_histogram(histograms):
+    # Cari nilai maksimum global dari semua kanal
+    global_max = max(max(values) for values in histograms.values())
+    print(global_max)
+    
+    # Normalisasi setiap kanal berdasarkan nilai maksimum global
+    normalized_histograms = {
+        key: values / global_max if global_max > 0 else values
+        for key, values in histograms.items()
+    }
+    return normalized_histograms
 
 def get_image_resolution(image_path):
     """
