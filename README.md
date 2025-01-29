@@ -5,11 +5,11 @@ ASDID ANN merupakan proyek personal yang bertujuan untuk mengembangkan model *co
 Model CNN yang dikembangkan memanfaatkan library [TensorFlow untuk Python](https://github.com/tensorflow/tensorflow).
 
 ## Ketergantungan
-Proyek ini dikembangkan dalam lingkungan dengan pustaka-pustaka berikut:
-- Python 3.9
+Proyek ini dikembangkan menggunakan `Python` 3.9 dalam lingkungan dengan pustaka-pustaka berikut:
 - TensorFlow dan Tensorboard 2.10 (versi terakhir dengan dukungan GPU di Windows)
-- Numpy 1.26.4
+- numpy 1.26.4
 - scikit-learn 1.5.1
+- pillow 10.4
 
 ## Penggunaan
 Proyek ini terdiri atas dua *folder*:
