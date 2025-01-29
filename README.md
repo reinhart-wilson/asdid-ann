@@ -16,6 +16,8 @@ Proyek ini terdiri atas dua *folder*:
   1. `src`: Berisi source code yang digunakan dalam eksperimen.
   2. `scripts`: Berisi skrip-skrip yang digunakan untuk menjalankan program. 
 
-Set data dapat diunduh dari [Auburn Soybean Disease Image Dataset](https://datadryad.org/stash/dataset/doi:10.5061/dryad.41ns1rnj3). Set data yang digunakan diletakkan di folder `dataset` yang diletakkan di `root` dari struktur proyek.  
+Semua data yang diperlukan disimpan di `[root]/training_result`. Ini termasuk set data citra untuk pelatihan dan pengujian serta set data yang diperoleh dari TensorBoard untuk visualisasi.
 
-Hasil pelatihan akan disimpan di `root/training_result`. Folder akan dibuat secara otomatis bila belum pernah dibuat sebelumnya.
+Set data dapat diunduh dari [Auburn Soybean Disease Image Dataset](https://datadryad.org/stash/dataset/doi:10.5061/dryad.41ns1rnj3). Perlu diperhatikan bahwa nama folder harus disesuaikan dengan skrip-skrip yang diperlukan.
+
+Hasil pelatihan akan disimpan di `[root]/training_result`. Folder akan dibuat secara otomatis bila belum pernah dibuat sebelumnya.
