@@ -11,8 +11,10 @@ Proyek ini dikembangkan menggunakan `Python` 3.9 dalam lingkungan dengan pustaka
 - scikit-learn 1.5.1
 - pillow 10.4
 
+Dalam folder `envs`, terdapat sebuah *file* `.yaml` yang berisi informasi semua ketergantungan pustaka. *File* ini dapat diimpor menggunakan Anaconda untuk membuat lingkungan yang memuat semua ketergantungan yang diperlukan. 
+
 ## Penggunaan
-Proyek ini terdiri atas dua *folder*:
+Proyek ini terdiri atas dua *folder* utama:
   1. `src`: Berisi source code yang digunakan dalam eksperimen.
   2. `scripts`: Berisi skrip-skrip yang digunakan untuk menjalankan program. 
 
